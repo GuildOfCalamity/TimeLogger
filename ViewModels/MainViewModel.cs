@@ -27,7 +27,7 @@ public class MainViewModel : INotifyPropertyChanged
         AddEntryCommand = new RelayCommand(AddEntry);
 
         // Load persisted data
-        _ = LoadAsync();
+        _ = LoadAsyncDescending();
 
         // Save whenever entries change
         Entries.CollectionChanged += async (_, __) =>
@@ -47,7 +47,7 @@ public class MainViewModel : INotifyPropertyChanged
         AddEntryCommand = new RelayCommand(AddEntry);
 
         // Load persisted data
-        _ = LoadAsync();
+        _ = LoadAsyncDescending();
 
         // Save whenever entries change
         Entries.CollectionChanged += async (_, __) =>
@@ -60,10 +60,21 @@ public class MainViewModel : INotifyPropertyChanged
     #endregion
 
     #region [Business Logic]
-    async Task LoadAsync()
+    async Task LoadAsyncAscending()
     {
         var loaded = await DataStore.LoadAsync();
-        foreach (var entry in loaded)
+        foreach (var entry in loaded.OrderBy(e => e.Date))
+            Entries.Add(entry);
+
+        Notify(nameof(TodayTotalDisplay));
+        Notify(nameof(WeekTotalDisplay));
+    }
+
+    async Task LoadAsyncDescending()
+    {
+        var loaded = await DataStore.LoadAsync();
+
+        foreach (var entry in loaded.OrderByDescending(e => e.Date))
             Entries.Add(entry);
 
         Notify(nameof(TodayTotalDisplay));
@@ -98,7 +109,15 @@ public class MainViewModel : INotifyPropertyChanged
             Date = DateTime.Today
         };
 
-        Entries.Add(entry);
+        //Entries.Add(entry);
+
+        // Insert newest first
+        int index = 0;
+        while (index < Entries.Count && Entries[index].Date >= entry.Date)
+            index++;
+
+        Entries.Insert(index, entry);
+
 
         DescriptionInput = "";
         UrlInput = "";
