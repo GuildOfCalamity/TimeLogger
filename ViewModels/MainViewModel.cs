@@ -101,27 +101,51 @@ public class MainViewModel : INotifyPropertyChanged
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(DescriptionInput))
+        {
+            _dialogService?.ShowWarning($"You must enter some data for the description");
+            return;
+        }
+
         var entry = new TaskEntry
         {
             Description = DescriptionInput,
             Url = !string.IsNullOrWhiteSpace(UrlInput) ? UrlInput : "https://azuredevops.com",
             TimeSpent = WorkTimeParser.Parse(TimeInput),
-            Date = DateTime.Today
+            Date = DateTime.Now // Date = DateTime.Today
         };
 
-        //Entries.Add(entry);
+        #region [Duplicate Check]
+        bool isDuplicate = Entries.Any(e =>
+            string.Equals(e.Description, entry.Description, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(e.Url, entry.Url, StringComparison.OrdinalIgnoreCase) &&
+            (e.Date.Day == entry.Date.Day && e.Date.Hour == entry.Date.Hour && e.Date.Year == entry.Date.Year)
+        );
 
-        // Insert newest first
+        if (isDuplicate)
+        {
+            _dialogService?.ShowWarning("This task already exists for today.");
+            return;
+        }
+        #endregion
+
+        #region [Insert at end (oldest first)]
+        //Entries.Add(entry);
+        #endregion
+
+        #region [Insert newest first]
         int index = 0;
         while (index < Entries.Count && Entries[index].Date >= entry.Date)
             index++;
 
         Entries.Insert(index, entry);
+        #endregion
 
-
+        #region [Clear out previous]
         DescriptionInput = "";
         UrlInput = "";
         TimeInput = "";
+        #endregion
 
         Notify(nameof(DescriptionInput));
         Notify(nameof(UrlInput));
