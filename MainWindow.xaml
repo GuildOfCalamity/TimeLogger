@@ -427,32 +427,41 @@
                             Padding="10"
                             Background="#2D2D2D"
                             CornerRadius="6">
-                            <StackPanel>
-                                <TextBlock
-                                    FontSize="16"
-                                    FontWeight="Bold"
-                                    Foreground="White"
-                                    Text="{Binding Description}" />
-                                <TextBlock
-                                    Cursor="Hand"
-                                    Foreground="#7FAAFF"
-                                    Text="{Binding Url}"
-                                    TextDecorations="Underline" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    Foreground="#4CAF50"
-                                    Text="{Binding TimeSpent}" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="#888"
-                                    Text="{Binding Date}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                                    <TextBlock
+                                        FontSize="16"
+                                        FontWeight="Bold"
+                                        Foreground="White"
+                                        Text="{Binding Description}" />
+                                    <TextBlock
+                                        Cursor="Hand"
+                                        Foreground="#7FAAFF"
+                                        Text="{Binding Url}"
+                                        TextDecorations="Underline" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        Foreground="#4CAF50"
+                                        Text="{Binding TimeSpent}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        FontSize="12"
+                                        Foreground="#888"
+                                        Text="{Binding Date}" />
+                                </StackPanel>
                                 <Button
+                                    Grid.Column="1"
+                                    Width="80"
                                     HorizontalAlignment="Right"
+                                    VerticalAlignment="Stretch"
                                     Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                     CommandParameter="{Binding}"
                                     Content="Edit" />
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

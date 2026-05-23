@@ -41,7 +41,8 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _dialogService = dialogService;
         AddEntryCommand = new RelayCommand(AddEntry);
-        EditEntryCommand = new RelayCommand(EditSelectedEntry);
+        //EditEntryCommand = new RelayCommand(EditSelectedEntry);
+        EditEntryCommand = new RelayCommand<TaskEntry>(EditEntry);
 
         ConfigManager.OnError += (s, e) =>
         {
@@ -76,7 +77,7 @@ public class MainViewModel : INotifyPropertyChanged
         UrlInput = entry.Url;
 
         // Convert TimeSpan back to Jira-style format
-        TimeInput = FormatTime(entry.TimeSpent);
+        TimeInput = Extensions.FormatTime(entry.TimeSpent);
 
         Notify(nameof(DescriptionInput));
         Notify(nameof(UrlInput));
@@ -104,6 +105,9 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(WeekTotalDisplay));
     }
 
+    /// <summary>
+    /// Inserts a <see cref="TaskEntry"/>.
+    /// </summary>
     void AddEntry()
     {
         if (string.IsNullOrWhiteSpace(TimeInput))
@@ -175,11 +179,51 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(TimeInput));
     }
 
-    private void EditSelectedEntry()
+    /// <summary>
+    /// Passes the <see cref="TaskEntry"/> to the edit dialog.
+    /// </summary>
+    void EditEntry(TaskEntry entry)
+    {
+        if (entry == null)
+        {
+            _dialogService?.ShowWarning($"Empty TaskEntry, cannot continue.");
+            return;
+        }
+
+        var dialog = new EditEntryWindow();
+
+        var vm = new EditEntryViewModel(entry, result =>
+        {
+            dialog.DialogResult = result;
+            dialog.Close();
+        });
+
+        dialog.DataContext = vm;
+        dialog.Owner = _dialogService.Instance;
+
+        bool? result = dialog.ShowDialog();
+
+        // If user clicked Save, update the entry in the list.
+        if (result == true)
+        {
+            int index = Entries.IndexOf(entry);
+            Entries.RemoveAt(index);
+            Entries.Insert(index, vm.EditedEntry);
+            // Save will occur in Entries.CollectionChanged event handler.
+
+            Notify(nameof(TodayTotalDisplay));
+            Notify(nameof(WeekTotalDisplay));
+        }
+    }
+
+    /// <summary>
+    /// Select an entry in the UI then click Edit to modify it.
+    /// </summary>
+    void EditSelectedEntry()
     {
         if (SelectedEntry == null)
         {
-            _dialogService?.Show($"Select an entry and then click [Edit]");
+            _dialogService?.Show($"Select an entry and then click Edit.");
             return;
         }
 
@@ -210,34 +254,12 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public string TodayTotalDisplay =>
-        FormatTime(Entries.Where(e => e.Date == DateTime.Today)
+        Extensions.FormatTime(Entries.Where(e => e.Date == DateTime.Today)
                           .Aggregate(TimeSpan.Zero, (a, b) => a + b.TimeSpent));
 
     public string WeekTotalDisplay =>
-        FormatTime(Entries.Where(e => IsSameBusinessWeek(e.Date))
+        Extensions.FormatTime(Entries.Where(e => Extensions.IsSameBusinessWeek(e.Date))
                           .Aggregate(TimeSpan.Zero, (a, b) => a + b.TimeSpent));
-
-    static bool IsSameBusinessWeek(DateTime date)
-    {
-        var today = DateTime.Today;
-        int diff = (int)today.DayOfWeek - (int)DayOfWeek.Monday;
-        if (diff < 0) diff += 7;
-
-        var monday = today.AddDays(-diff);
-        var friday = monday.AddDays(4);
-
-        return date >= monday && date <= friday;
-    }
-
-    static string FormatTime(TimeSpan ts)
-    {
-        List<string> parts = new();
-
-        if (ts.Days > 0) parts.Add($"{ts.Days}d");
-        if (ts.Hours > 0) parts.Add($"{ts.Hours}h");
-        if (ts.Minutes > 0) parts.Add($"{ts.Minutes}m");
-
-        return parts.Count == 0 ? "0m" : string.Join(" ", parts);
-    }
+ 
     #endregion
 }

@@ -1,19 +1,14 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using TimeLogger.Services;
 using TimeLogger.ViewModels;
 
-namespace TimeLogger
+namespace TimeLogger;
+
+public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-            DataContext = new MainViewModel(new DialogService(this));
-        }
+        InitializeComponent();
+        DataContext = new MainViewModel(new DialogService(this));
     }
 }

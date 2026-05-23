@@ -1,13 +1,9 @@
 ﻿using System.Diagnostics;
-using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace TimeLogger
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         public static bool DebugMode { get; set; } = false;
@@ -48,8 +44,12 @@ namespace TimeLogger
         {
             try
             {
-                Debug.WriteLine($"Unhandled exception thrown from Dispatcher {e.Dispatcher}: {e.Exception}");
-                Debug.WriteLine($"Unhandled exception StackTrace: {Environment.StackTrace}");
+                var err = $"Unhandled exception thrown from Dispatcher {e.Dispatcher}: {e.Exception}";
+                Debug.WriteLine(err);
+                err.WriteToLog(LogLevel.Error);
+                err = $"Unhandled exception StackTrace: {Environment.StackTrace}";
+                Debug.WriteLine(err);
+                err.WriteToLog(LogLevel.Error);
                 e.Handled = true;
             }
             catch { }
@@ -59,7 +59,9 @@ namespace TimeLogger
         {
             try
             {
-                Debug.WriteLine($"Unhandled exception thrown: {((Exception)e.ExceptionObject).Message}");
+                var err = $"Unhandled exception thrown: {((Exception)e.ExceptionObject).Message}";
+                Debug.WriteLine(err);
+                err.WriteToLog(LogLevel.Error);
             }
             catch { }
         }
@@ -86,7 +88,9 @@ namespace TimeLogger
             {
                 aex?.Flatten().Handle(ex =>
                 {
-                    Debug.WriteLine($"[WARNING] Unobserved task exception: {ex?.Message}");
+                    var err = $"Unobserved task exception: {ex?.Message}";
+                    Debug.WriteLine(err);
+                    err.WriteToLog(LogLevel.Error);
                     return true;
                 });
             }

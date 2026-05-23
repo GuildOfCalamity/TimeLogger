@@ -49,9 +49,27 @@ public class DialogService : IDialogService
 
     public bool? Show(string message) => ShowInfo(message);
 
-    public bool? ShowInfo(string message) => WpfMessageBox.Show(message, false, false, owner: Instance);
+    public bool? ShowInfo(string message)
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+            return WpfMessageBox.Show(message, false, false, owner: Instance);
+        else
+            return Application.Current.Dispatcher.Invoke(() => WpfMessageBox.Show(message, false, false, owner: Instance));
+    }
 
-    public bool? ShowWarning(string message) => WpfMessageBox.Show(message, false, true, owner: Instance);
+    public bool? ShowWarning(string message)
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+            return WpfMessageBox.Show(message, false, true, owner: Instance);
+        else
+            return Application.Current.Dispatcher.Invoke(() => WpfMessageBox.Show(message, false, true, owner: Instance));
+    }
 
-    public bool? ShowOKCancel(string message) => WpfMessageBox.Show(message, true, false, owner: Instance);
+    public bool? ShowOKCancel(string message)
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+            return WpfMessageBox.Show(message, true, false, owner: Instance);
+        else
+            return Application.Current.Dispatcher.Invoke(() => WpfMessageBox.Show(message, true, false, owner: Instance));
+    }
 }
