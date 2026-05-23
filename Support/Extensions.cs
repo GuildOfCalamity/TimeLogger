@@ -881,6 +881,30 @@ public static class Extensions
     }
 
     /// <summary>
+    /// Find & return a WPF control based on its resource key name.
+    /// </summary>
+    public static T? FindChild<T>(DependencyObject parent, string childName) where T : FrameworkElement
+    {
+        if (parent == null)
+            return null;
+
+        int count = VisualTreeHelper.GetChildrenCount(parent);
+        for (int i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+
+            if (child is T fe && fe.Name == childName)
+                return fe;
+
+            var result = FindChild<T>(child, childName);
+            if (result != null)
+                return result;
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// <code>
     ///   IEnumerable<DependencyObject> cntrls = this.FindUIElements();
     /// </code>

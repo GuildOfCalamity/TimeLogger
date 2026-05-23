@@ -3,9 +3,124 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Microsoft.Xaml.Behaviors;
 
 namespace TimeLogger.Behaviors;
 
+public class SwipeBehavior : Behavior<FrameworkElement>
+{
+    #region [Properties]
+    Point _start;
+    bool _swiping;
+    const double DeadZone = 6;
+    const double ActionThreshold = 120; // how far (in pixels) to drag before triggering action
+    double _lastX = 0;
+    bool _hasMoved = false;
+
+    public ICommand EditCommand
+    {
+        get => (ICommand)GetValue(EditCommandProperty);
+        set => SetValue(EditCommandProperty, value);
+    }
+
+    public static readonly DependencyProperty EditCommandProperty =
+        DependencyProperty.Register(nameof(EditCommand), typeof(ICommand), typeof(SwipeBehavior));
+
+    public ICommand DeleteCommand
+    {
+        get => (ICommand)GetValue(DeleteCommandProperty);
+        set => SetValue(DeleteCommandProperty, value);
+    }
+
+    public static readonly DependencyProperty DeleteCommandProperty =
+        DependencyProperty.Register(nameof(DeleteCommand), typeof(ICommand), typeof(SwipeBehavior));
+    #endregion
+
+    protected override void OnAttached()
+    {
+        AssociatedObject.PreviewMouseLeftButtonDown += OnDown;
+        AssociatedObject.PreviewMouseMove += OnMove;
+        AssociatedObject.PreviewMouseLeftButtonUp += OnUp;
+
+        if (AssociatedObject.RenderTransform is not TranslateTransform)
+            AssociatedObject.RenderTransform = new TranslateTransform();
+    }
+
+    protected override void OnDetaching()
+    {
+        AssociatedObject.PreviewMouseLeftButtonDown -= OnDown;
+        AssociatedObject.PreviewMouseMove -= OnMove;
+        AssociatedObject.PreviewMouseLeftButtonUp -= OnUp;
+    }
+
+    void OnDown(object sender, MouseButtonEventArgs e)
+    {
+        _start = e.GetPosition(AssociatedObject);
+        _swiping = true;
+        _hasMoved = false;
+        _lastX = 0;
+
+        AssociatedObject.CaptureMouse();
+    }
+
+    void OnMove(object sender, MouseEventArgs e)
+    {
+        if (!_swiping) return;
+
+        var pos = e.GetPosition(AssociatedObject);
+        double dx = pos.X - _start.X;
+        double dy = pos.Y - _start.Y;
+
+        // Only horizontal movement triggers swipe
+        if (Math.Abs(dx) < DeadZone || Math.Abs(dx) < Math.Abs(dy))
+            return;
+
+        e.Handled = true;
+        _hasMoved = true;
+
+        // Smooth movement: weighted interpolation
+        double smoothed = (_lastX * 0.7) + (dx * 0.3);
+
+        if (AssociatedObject.RenderTransform is TranslateTransform tt)
+            tt.X = smoothed;
+
+        _lastX = smoothed;
+    }
+
+    void OnUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_swiping) return;
+        _swiping = false;
+
+        AssociatedObject.ReleaseMouseCapture();
+
+        if (AssociatedObject.RenderTransform is not TranslateTransform tt)
+            return;
+
+        double dx = tt.X;
+
+        if (_hasMoved)
+        {
+            if (dx >= ActionThreshold)
+            {
+                if (EditCommand?.CanExecute(AssociatedObject.DataContext) == true)
+                    EditCommand.Execute(AssociatedObject.DataContext);
+            }
+            else if (dx <= -ActionThreshold)
+            {
+                if (DeleteCommand?.CanExecute(AssociatedObject.DataContext) == true)
+                    DeleteCommand.Execute(AssociatedObject.DataContext);
+            }
+        }
+
+        // Snap back (no animation = no frozen transform)
+        tt.X = 0;
+    }
+}
+
+/// <summary>
+/// This home-brew version does not work as well as the Microsoft.Xaml.Behaviors NuGet package.
+/// </summary>
 public static class SwipeToDeleteOrEditBehavior
 {
     #region [Attached Properties]
@@ -57,7 +172,7 @@ public static class SwipeToDeleteOrEditBehavior
             DateTime lastMoveTime = DateTime.Now;
 
             const double deadZone = 6;
-            const double actionThreshold = 120;
+            const double actionThreshold = 120; // how far (in pixels) to drag before triggering action
 
             element.MouseLeftButtonDown += (_, args) =>
             {
@@ -104,14 +219,8 @@ public static class SwipeToDeleteOrEditBehavior
                 }
 
                 double velocity = finalX / (DateTime.Now - lastMoveTime).TotalMilliseconds;
-
-                bool isDelete =
-                    finalX < -actionThreshold ||
-                    velocity < -0.8;
-
-                bool isEdit =
-                    finalX > actionThreshold ||
-                    velocity > 0.8;
+                bool isDelete = finalX < -actionThreshold || velocity < -0.8;
+                bool isEdit = finalX > actionThreshold || velocity > 0.8;
 
                 if (isDelete)
                 {

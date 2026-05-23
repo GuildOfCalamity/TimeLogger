@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:TimeLogger.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:TimeLogger"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="TimeLogger"
@@ -348,7 +349,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!--  INPUT PANE  -->
+        <!--  USER INPUT  -->
         <Border
             Grid.Row="0"
             Padding="10"
@@ -378,7 +379,7 @@
             </StackPanel>
         </Border>
 
-        <!--  TOTALS PANE  -->
+        <!--  CURRENT TOTALS  -->
         <Border
             Grid.Row="1"
             Padding="10"
@@ -408,7 +409,7 @@
             </StackPanel>
         </Border>
 
-        <!--  ENTRIES PANE  -->
+        <!--  LIST ENTRIES  -->
         <Border
             Grid.Row="2"
             Padding="4"
@@ -421,58 +422,60 @@
                 Foreground="White"
                 ItemsSource="{Binding Entries}"
                 SelectedItem="{Binding SelectedEntry, Mode=TwoWay}">
+
+                <!--#region [Swipe Item Template using code-behind]-->
+                <!--
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="SwipeItem_PreviewMouseLeftButtonDown" />
+                        <EventSetter Event="PreviewMouseMove" Handler="SwipeItem_PreviewMouseMove" />
+                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="SwipeItem_PreviewMouseLeftButtonUp" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0">
+                        <Grid Height="70" Margin="0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="42" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="480" />
+                                <ColumnDefinition Width="480" />
                             </Grid.ColumnDefinitions>
-                            <!--  LEFT BACKGROUND (EDIT)  -->
                             <Border
                                 Grid.Column="0"
                                 Background="#2962FF"
-                                CornerRadius="4">
-                                <Grid>
-                                    <TextBlock
-                                        Margin="20"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Center"
-                                        FontSize="24"
-                                        Foreground="White"
-                                        Opacity="0.85"
-                                        Text="✏️" />
-                                </Grid>
+                                CornerRadius="6"
+                                IsHitTestVisible="False">
+                                <TextBlock
+                                    Margin="20"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontSize="24"
+                                    Foreground="White"
+                                    Opacity="0.85"
+                                    Text="✏️" />
                             </Border>
-
-                            <!--  RIGHT BACKGROUND (DELETE)  -->
                             <Border
-                                Grid.Column="2"
+                                Grid.Column="1"
                                 Background="#B00020"
-                                CornerRadius="4">
-                                <Grid>
-                                    <TextBlock
-                                        Margin="20"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        FontSize="26"
-                                        Foreground="White"
-                                        Opacity="0.85"
-                                        Text="🗑" />
-                                </Grid>
+                                CornerRadius="6"
+                                IsHitTestVisible="False">
+                                <TextBlock
+                                    Margin="20"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontSize="26"
+                                    Foreground="White"
+                                    Opacity="0.85"
+                                    Text="🗑" />
                             </Border>
-
-
                             <Border
-                                Grid.ColumnSpan="3"
-                                Margin="0"
+                                x:Name="SwipeContent"
+                                Grid.ColumnSpan="2"
                                 Padding="10"
-                                behaviors:SwipeToDeleteOrEditBehavior.DeleteCommand="{Binding DataContext.DeleteEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                behaviors:SwipeToDeleteOrEditBehavior.EditCommand="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                behaviors:SwipeToDeleteOrEditBehavior.EnableSwipe="True"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
                                 Background="#2D2D2D"
-                                CornerRadius="4">
+                                CornerRadius="6"
+                                IsHitTestVisible="True">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -504,14 +507,169 @@
                                         Width="80"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Stretch"
+                                        Panel.ZIndex="10"
                                         Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                         CommandParameter="{Binding}"
                                         Content="Edit" />
                                 </Grid>
                             </Border>
+
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
+                -->
+                <!--#endregion-->
+
+                <!--#region [Swipe Item Template using DP behavior]-->
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="42" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border
+                                Grid.Column="0"
+                                Background="#2962FF"
+                                CornerRadius="4"
+                                IsHitTestVisible="False">
+                                <Grid>
+                                    <TextBlock
+                                        Margin="20"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        FontSize="24"
+                                        Foreground="White"
+                                        Opacity="0.85"
+                                        Text="✏️" />
+                                </Grid>
+                            </Border>
+                            <Border
+                                Grid.Column="2"
+                                Background="#B00020"
+                                CornerRadius="4"
+                                IsHitTestVisible="False">
+                                <Grid>
+                                    <TextBlock
+                                        Margin="20"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontSize="26"
+                                        Foreground="White"
+                                        Opacity="0.85"
+                                        Text="🗑" />
+                                </Grid>
+                            </Border>
+                            <!-- [If using home-brew behavior class]
+                            <Border
+                                x:Name="SwipeContent"
+                                Grid.ColumnSpan="3"
+                                Margin="0"
+                                Padding="10"
+                                behaviors:SwipeToDeleteOrEditBehavior.DeleteCommand="{Binding DataContext.DeleteEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                behaviors:SwipeToDeleteOrEditBehavior.EditCommand="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                behaviors:SwipeToDeleteOrEditBehavior.EnableSwipe="True"
+                                Background="#2D2D2D"
+                                CornerRadius="4"
+                                Focusable="False"
+                                IsHitTestVisible="True">
+                            -->
+                            <Border
+                                x:Name="SwipeContent"
+                                Grid.ColumnSpan="3"
+                                Margin="0"
+                                Padding="10"
+                                Background="#2D2D2D"
+                                CornerRadius="4"
+                                Focusable="False"
+                                IsHitTestVisible="True">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:SwipeBehavior DeleteCommand="{Binding DataContext.DeleteEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" EditCommand="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" />
+                                </i:Interaction.Behaviors>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                                        <TextBlock
+                                            FontSize="16"
+                                            FontWeight="Bold"
+                                            Foreground="White"
+                                            Text="{Binding Description}" />
+                                        <TextBlock
+                                            Cursor="Hand"
+                                            Foreground="#7FAAFF"
+                                            Text="{Binding Url}"
+                                            TextDecorations="Underline" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            Foreground="#4CAF50"
+                                            Text="{Binding TimeSpent}" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontSize="12"
+                                            Foreground="#888"
+                                            Text="{Binding Date}" />
+                                    </StackPanel>
+                                    <!--
+                                    <Button
+                                        Width="80"
+                                        HorizontalAlignment="Right"
+                                        Focusable="True"
+                                        VerticalAlignment="Stretch"
+                                        Panel.ZIndex="99"
+                                        Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Content="Edit" />
+                                    -->
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Left"
+                                        Opacity="0.8"
+                                        Orientation="Horizontal">
+                                        <Border
+                                            Width="100"
+                                            Height="30"
+                                            Margin="0,0,10,0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Stretch"
+                                            Background="Transparent"
+                                            BorderBrush="{StaticResource BlueBrushLinear}"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Focusable="False">
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Foreground="{StaticResource BlueBrushLinear}"
+                                                Text="❮❮❮❮ Delete" />
+                                        </Border>
+                                        <Border
+                                            Width="100"
+                                            Height="30"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Stretch"
+                                            Background="Transparent"
+                                            BorderBrush="{StaticResource BlueBrushLinear}"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Focusable="False">
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Foreground="{StaticResource BlueBrushLinear}"
+                                                Text="Edit ❯❯❯❯" />
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <!--#endregion-->
+
             </ListBox>
         </Border>
 
