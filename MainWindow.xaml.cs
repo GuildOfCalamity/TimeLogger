@@ -13,8 +13,6 @@ namespace TimeLogger
         public MainWindow()
         {
             InitializeComponent();
-            //DataContext = new MainViewModel(this);
-            // If using IDialogService instead of MainWindow instance, use the following line instead:
             DataContext = new MainViewModel(new DialogService(this));
         }
     }

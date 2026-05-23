@@ -81,21 +81,21 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(TimeInput));
     }
 
-    async Task LoadAsyncAscending()
+    async Task LoadAsyncDescending()
     {
         var loaded = await DataStore.LoadAsync();
-        foreach (var entry in loaded.OrderBy(e => e.Date))
+
+        foreach (var entry in loaded.OrderByDescending(e => e.Date))
             Entries.Add(entry);
 
         Notify(nameof(TodayTotalDisplay));
         Notify(nameof(WeekTotalDisplay));
     }
 
-    async Task LoadAsyncDescending()
+    async Task LoadAsyncAscending()
     {
         var loaded = await DataStore.LoadAsync();
-
-        foreach (var entry in loaded.OrderByDescending(e => e.Date))
+        foreach (var entry in loaded.OrderBy(e => e.Date))
             Entries.Add(entry);
 
         Notify(nameof(TodayTotalDisplay));
