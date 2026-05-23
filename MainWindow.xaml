@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="TimeLogger"
     Width="1000"
-    Height="650"
+    Height="750"
     Background="#181818"
     FontFamily="Aptos Mono"
     Icon="/AppIcon.ico"
@@ -417,8 +417,8 @@
                 BorderBrush="#333"
                 BorderThickness="1"
                 Foreground="White"
-                ItemsSource="{Binding Entries}">
-
+                ItemsSource="{Binding Entries}"
+                SelectedItem="{Binding SelectedEntry, Mode=TwoWay}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border

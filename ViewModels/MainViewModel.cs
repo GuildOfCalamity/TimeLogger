@@ -13,29 +13,24 @@ public class MainViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     void Notify([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     public ObservableCollection<TaskEntry> Entries { get; } = new();
-    public string DescriptionInput { get; set; }
-    public string UrlInput { get; set; }
-    public string TimeInput { get; set; }
+    public string? DescriptionInput { get; set; }
+    public string? UrlInput { get; set; }
+    public string? TimeInput { get; set; }
+    public string? DefaultUrl { get; set; }
     public ICommand AddEntryCommand { get; }
-    #endregion
 
-    #region [Constructor using MainWindow Instance]
-    MainWindow? WindowInstance { get; set; } = null;
-    public MainViewModel(MainWindow mainWindow)
+    TaskEntry? _selectedEntry;
+    public TaskEntry? SelectedEntry
     {
-        WindowInstance = mainWindow;
-        AddEntryCommand = new RelayCommand(AddEntry);
-
-        // Load persisted data
-        _ = LoadAsyncDescending();
-
-        // Save whenever entries change
-        Entries.CollectionChanged += async (_, __) =>
+        get => _selectedEntry;
+        set
         {
-            await DataStore.SaveAsync(Entries);
-            Notify(nameof(TodayTotalDisplay));
-            Notify(nameof(WeekTotalDisplay));
-        };
+            _selectedEntry = value;
+            Notify();
+
+            if (value != null)
+                PopulateInputsFromSelected(value);
+        }
     }
     #endregion
 
@@ -45,6 +40,19 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _dialogService = dialogService;
         AddEntryCommand = new RelayCommand(AddEntry);
+
+        ConfigManager.OnError += (s, e) =>
+        {
+            _dialogService?.ShowWarning($"ConfigManager error:{Environment.NewLine}{e.Message}");
+        };
+
+        // Load app configs
+        DefaultUrl = ConfigManager.Get("DefaultUrl", defaultValue: string.Empty);
+        if (string.IsNullOrEmpty(DefaultUrl))
+        {
+            DefaultUrl = "https://azuredevops.com";
+            ConfigManager.Set("DefaultUrl", "https://azuredevops.com", saveAfterUpdate: true); 
+        }
 
         // Load persisted data
         _ = LoadAsyncDescending();
@@ -60,6 +68,19 @@ public class MainViewModel : INotifyPropertyChanged
     #endregion
 
     #region [Business Logic]
+    void PopulateInputsFromSelected(TaskEntry entry)
+    {
+        DescriptionInput = entry.Description;
+        UrlInput = entry.Url;
+
+        // Convert TimeSpan back to Jira-style format
+        TimeInput = FormatTime(entry.TimeSpent);
+
+        Notify(nameof(DescriptionInput));
+        Notify(nameof(UrlInput));
+        Notify(nameof(TimeInput));
+    }
+
     async Task LoadAsyncAscending()
     {
         var loaded = await DataStore.LoadAsync();
@@ -110,7 +131,7 @@ public class MainViewModel : INotifyPropertyChanged
         var entry = new TaskEntry
         {
             Description = DescriptionInput,
-            Url = !string.IsNullOrWhiteSpace(UrlInput) ? UrlInput : "https://azuredevops.com",
+            Url = !string.IsNullOrWhiteSpace(UrlInput) ? UrlInput : DefaultUrl,
             TimeSpent = WorkTimeParser.Parse(TimeInput),
             Date = DateTime.Now // Date = DateTime.Today
         };

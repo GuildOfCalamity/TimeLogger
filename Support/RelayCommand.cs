@@ -103,12 +103,6 @@ public class RelayCommand<T> : ICommand
 
     public void Execute(object? parameter)
     {
-        //if (parameter == null)
-        //    Debug.WriteLine($"[WARNING] RelayCommand.Execute: {nameof(parameter)} is null!");
-        //else if (parameter is System.Windows.Controls.TextBox obj1)
-        //    System.Diagnostics.Debug.WriteLine($">> Object {obj1?.Name} is a TextBox");
-        //else if (parameter is System.Windows.Controls.Button obj2)
-        //    System.Diagnostics.Debug.WriteLine($">> Object {obj2?.Name} is a Button");
         try
         {
             this.execute((T)parameter);
@@ -265,4 +259,3 @@ public class RelayCommandResult : ICommand
     public override string ToString() => $"RelayCommandResult<{_execute?.Target}> bound to event {_execute?.Method.Name}";
     #endregion
 }
-

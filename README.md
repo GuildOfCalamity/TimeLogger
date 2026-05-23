@@ -24,3 +24,6 @@
 
 ## 📋 Proofing
 * This application was compiled and tested using *VisualStudio* 2022 on *Windows 10/11* versions **22H2**, **21H2**, **21H1** and **25H2**.
+
+## 🔔 Future Work
+* Could add a `DateTime` picker to the UI to allow users to select the date and time for their tasks, instead of using the current date and time.
