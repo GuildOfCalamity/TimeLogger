@@ -6,7 +6,11 @@
 
 ![Edit](./Screenshot2.png)
 
-![Data](./Screenshot3.png)
+![SwipeEdit](./Screenshot3.png)
+
+![SwipeDelete](./Screenshot4.png)
+
+![Data](./Screenshot5.png)
 
 **Dependencies**
 
