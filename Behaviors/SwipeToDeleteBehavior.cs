@@ -7,13 +7,16 @@ using Microsoft.Xaml.Behaviors;
 
 namespace TimeLogger.Behaviors;
 
-public class SwipeBehavior : Behavior<FrameworkElement>
+/// <summary>
+/// I've implemented this behavior in two ways: as a Microsoft.Xaml.Behaviors NuGet package behavior (SwipeBehavior) and as a home-brew attached property (SwipeToDeleteOrEditBehavior).
+/// </summary>
+public class SwipeBehavior : Behavior<System.Windows.FrameworkElement>
 {
     #region [Properties]
-    Point _start;
+    System.Windows.Point _start;
     bool _swiping;
     const double DeadZone = 6;
-    const double ActionThreshold = 120; // how far (in pixels) to drag before triggering action
+    const double ActionThreshold = 90; // how far (in pixels) to drag before triggering action
     double _lastX = 0;
     bool _hasMoved = false;
 
