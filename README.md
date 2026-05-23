@@ -2,9 +2,11 @@
 
 ## 💻 WPF - Time Logger
 
-![Example](./Screenshot.png)
+![Main](./Screenshot.png)
 
-![Data](./Screenshot2.png)
+![Edit](./Screenshot2.png)
+
+![Data](./Screenshot3.png)
 
 **Dependencies**
 
