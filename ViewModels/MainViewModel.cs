@@ -19,7 +19,7 @@ public class MainViewModel : INotifyPropertyChanged
     public string? DefaultUrl { get; set; }
     public ICommand AddEntryCommand { get; }
     public ICommand EditEntryCommand { get; }
-
+    public ICommand DeleteEntryCommand { get; }
     TaskEntry? _selectedEntry;
     public TaskEntry? SelectedEntry
     {
@@ -43,6 +43,7 @@ public class MainViewModel : INotifyPropertyChanged
         AddEntryCommand = new RelayCommand(AddEntry);
         //EditEntryCommand = new RelayCommand(EditSelectedEntry);
         EditEntryCommand = new RelayCommand<TaskEntry>(EditEntry);
+        DeleteEntryCommand = new RelayCommand<TaskEntry>(DeleteEntry);
 
         ConfigManager.OnError += (s, e) =>
         {
@@ -251,6 +252,20 @@ public class MainViewModel : INotifyPropertyChanged
             Notify(nameof(TodayTotalDisplay));
             Notify(nameof(WeekTotalDisplay));
         }
+    }
+
+    void DeleteEntry(TaskEntry entry)
+    {
+        if (entry == null)
+        {
+            _dialogService?.ShowWarning($"Empty TaskEntry, cannot continue.");
+            return;
+        }
+
+        Entries.Remove(entry);
+
+        Notify(nameof(TodayTotalDisplay));
+        Notify(nameof(WeekTotalDisplay));
     }
 
     public string TodayTotalDisplay =>
