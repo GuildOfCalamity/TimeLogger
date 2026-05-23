@@ -6,6 +6,12 @@ namespace TimeLogger.Services;
 public interface IDialogService
 {
     /// <summary>
+    /// Window owner for the dialogs. 
+    /// This is used to ensure that dialogs are on the main window and they are modal to it.
+    /// </summary>
+    MainWindow? Instance { get; }
+
+    /// <summary>
     /// Same as <see cref="ShowInfo(string)"/> but with a more generic name. 
     /// This is the default method for showing messages to the user.
     /// </summary>
@@ -34,7 +40,7 @@ public interface IDialogService
 
 public class DialogService : IDialogService
 {
-    MainWindow? Instance { get; set; } = null;
+    public MainWindow? Instance { get; set; } = null;
 
     public DialogService(MainWindow? owner = null)
     {

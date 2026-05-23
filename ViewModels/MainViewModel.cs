@@ -18,6 +18,7 @@ public class MainViewModel : INotifyPropertyChanged
     public string? TimeInput { get; set; }
     public string? DefaultUrl { get; set; }
     public ICommand AddEntryCommand { get; }
+    public ICommand EditEntryCommand { get; }
 
     TaskEntry? _selectedEntry;
     public TaskEntry? SelectedEntry
@@ -40,6 +41,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _dialogService = dialogService;
         AddEntryCommand = new RelayCommand(AddEntry);
+        EditEntryCommand = new RelayCommand(EditSelectedEntry);
 
         ConfigManager.OnError += (s, e) =>
         {
@@ -171,6 +173,40 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(DescriptionInput));
         Notify(nameof(UrlInput));
         Notify(nameof(TimeInput));
+    }
+
+    private void EditSelectedEntry()
+    {
+        if (SelectedEntry == null)
+        {
+            _dialogService?.Show($"Select an entry and then click [Edit]");
+            return;
+        }
+
+        var dialog = new EditEntryWindow();
+
+        var vm = new EditEntryViewModel(SelectedEntry, result =>
+        {
+            dialog.DialogResult = result;
+            dialog.Close();
+        });
+
+        dialog.DataContext = vm;
+        dialog.Owner = _dialogService.Instance;
+
+        bool? result = dialog.ShowDialog();
+
+        // If user clicked Save, update the entry in the list.
+        if (result == true)
+        {
+            int index = Entries.IndexOf(SelectedEntry);
+            Entries.RemoveAt(index);
+            Entries.Insert(index, vm.EditedEntry);
+            // Save will occur in Entries.CollectionChanged event handler.
+
+            Notify(nameof(TodayTotalDisplay));
+            Notify(nameof(WeekTotalDisplay));
+        }
     }
 
     public string TodayTotalDisplay =>
