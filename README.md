@@ -2,13 +2,23 @@
 
 ## 💻 WPF - Time Logger
 
+> Main UI
+
 ![Main](./Screenshot.png)
+
+> Edit Modal
 
 ![Edit](./Screenshot2.png)
 
+> Swipe-right to edit
+
 ![SwipeEdit](./Screenshot3.png)
 
+> Swipe-left to delete
+
 ![SwipeDelete](./Screenshot4.png)
+
+> Backing JSON Data
 
 ![Data](./Screenshot5.png)
 
