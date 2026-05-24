@@ -7,7 +7,7 @@ namespace TimeLogger.ViewModels;
 public class EditEntryViewModel
 {
     #region [Properties]
-    readonly Action<bool> _closeCallback;
+    readonly Action<bool> _closeCallback; // to return once dialog closes
     public string Description { get; set; }
     public string Url { get; set; }
     public string TimeInput { get; set; }

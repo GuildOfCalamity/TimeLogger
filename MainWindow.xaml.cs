@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -24,7 +23,7 @@ public partial class MainWindow : Window
     System.Windows.Point _swipeStart;
     bool _swipeActive;
     const double DeadZone = 6;
-    const double ActionThreshold = 120;
+    const double ActionThreshold = 90;
 
     Border? GetSwipeContent(ListBoxItem item)
     {
@@ -94,6 +93,13 @@ public partial class MainWindow : Window
         tt.X = 0;
     }
 
+    /// <summary>
+    /// Calls a VM RelayCommand by name, passing the ListBoxItem's DataContext as the command parameter.
+    /// This is a bit hacky but it keeps the code-behind free of any specific VM types or references.
+    /// The command name is passed as a string to avoid having to cast the DataContext to MainViewModel.
+    /// </summary>
+    /// <param name="item"><see cref="ListBoxItem"/></param>
+    /// <param name="commandName">name of the <see cref="RelayCommand"/></param>
     void ExecuteItemCommand(ListBoxItem item, string commandName)
     {
         if (DataContext is not MainViewModel vm) 
@@ -107,7 +113,5 @@ public partial class MainWindow : Window
                 cmd.Execute(entry);
         }
     }
-
-  
     #endregion
 }

@@ -219,7 +219,6 @@ public class MainViewModel : INotifyPropertyChanged
         }
 
         var dialog = new EditEntryWindow();
-
         var vm = new EditEntryViewModel(entry, result =>
         {
             dialog.DialogResult = result;

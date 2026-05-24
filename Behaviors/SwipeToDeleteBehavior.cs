@@ -155,7 +155,7 @@ public static class SwipeToDeleteOrEditBehavior
     public static ICommand GetEditCommand(DependencyObject obj) => (ICommand)obj.GetValue(EditCommandProperty);
     public static void SetEnableSwipe(DependencyObject obj, bool value) => obj.SetValue(EnableSwipeProperty, value);
     public static bool GetEnableSwipe(DependencyObject obj) => (bool)obj.GetValue(EnableSwipeProperty);
-    private static void OnEnableSwipeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    static void OnEnableSwipeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not FrameworkElement element)
             return;
@@ -175,7 +175,7 @@ public static class SwipeToDeleteOrEditBehavior
             DateTime lastMoveTime = DateTime.Now;
 
             const double deadZone = 6;
-            const double actionThreshold = 120; // how far (in pixels) to drag before triggering action
+            const double actionThreshold = 90; // how far (in pixels) to drag before triggering action
 
             element.MouseLeftButtonDown += (_, args) =>
             {
