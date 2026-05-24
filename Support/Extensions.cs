@@ -36,6 +36,13 @@ public static class Extensions
         return date >= monday && date <= friday;
     }
 
+    public static bool IsSameSevenDayWeek(DateTime date)
+    {
+        var today = DateTime.Today;
+        var sevenDaysAgo = today.AddDays(-6); // inclusive 7‑day window
+        return date.Date >= sevenDaysAgo && date.Date <= today;
+    }
+
     #region [Logger with automatic duplicate checking]
     static HashSet<string> _logCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     static DateTime _logCacheUpdated = DateTime.Now;

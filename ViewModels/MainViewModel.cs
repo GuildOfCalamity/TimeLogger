@@ -13,6 +13,7 @@ public class MainViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     void Notify([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     public ObservableCollection<TaskEntry> Entries { get; } = new();
+    public bool UseBusinessWeek { get; set; }
     public string? DescriptionInput { get; set; }
     public string? UrlInput { get; set; }
     public string? TimeInput { get; set; }
@@ -31,6 +32,30 @@ public class MainViewModel : INotifyPropertyChanged
 
             if (value != null)
                 PopulateInputsFromSelected(value);
+        }
+    }
+    public string TodayTotalDisplay
+    {
+        get
+        {
+            return Extensions.FormatTime(Entries.Where(e => e.Date == DateTime.Today)
+                  .Aggregate(TimeSpan.Zero, (a, b) => a + b.TimeSpent));
+        }
+    }
+    public string WeekTotalDisplay
+    {
+        get
+        {
+            if (UseBusinessWeek)
+            {
+                return Extensions.FormatTime(Entries.Where(e => Extensions.IsSameBusinessWeek(e.Date))
+                     .Aggregate(TimeSpan.Zero, (a, b) => a + b.TimeSpent));
+            }
+            else
+            {
+                return Extensions.FormatTime(Entries.Where(e => Extensions.IsSameSevenDayWeek(e.Date))
+                    .Aggregate(TimeSpan.Zero, (a, b) => a + b.TimeSpent));
+            }
         }
     }
     #endregion
@@ -52,8 +77,10 @@ public class MainViewModel : INotifyPropertyChanged
 
         // Load app configs
         DefaultUrl = ConfigManager.Get("DefaultUrl", defaultValue: string.Empty);
+        UseBusinessWeek = ConfigManager.Get("UseBusinessWeek", defaultValue: true);
         if (string.IsNullOrEmpty(DefaultUrl))
         {
+            ConfigManager.Set(nameof(UseBusinessWeek), true, saveAfterUpdate: true);
             DefaultUrl = "https://azuredevops.com";
             ConfigManager.Set("DefaultUrl", "https://azuredevops.com", saveAfterUpdate: true); 
         }
@@ -267,14 +294,5 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(TodayTotalDisplay));
         Notify(nameof(WeekTotalDisplay));
     }
-
-    public string TodayTotalDisplay =>
-        Extensions.FormatTime(Entries.Where(e => e.Date == DateTime.Today)
-                          .Aggregate(TimeSpan.Zero, (a, b) => a + b.TimeSpent));
-
-    public string WeekTotalDisplay =>
-        Extensions.FormatTime(Entries.Where(e => Extensions.IsSameBusinessWeek(e.Date))
-                          .Aggregate(TimeSpan.Zero, (a, b) => a + b.TimeSpent));
- 
     #endregion
 }
