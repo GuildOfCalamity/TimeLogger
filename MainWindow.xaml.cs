@@ -13,16 +13,15 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = new MainViewModel(new DialogService(this));
-
         #region [Example of fetching window from separate module]
-        // Get the active window on the Dispatcher thread
-        var window1 = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        // Get the active window on the Dispatcher thread:
+        //var window1 = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
 
-        // Get the window that owns the Dispatcher (UI thread)
-        var window2 = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.Dispatcher == App.Current.MainWindow.Dispatcher);
+        // Get the window that owns the Dispatcher (UI thread):
+        //var window2 = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.Dispatcher == App.Current.MainWindow.Dispatcher);
 
-        // Get the window from a UI element (when available)
-        var window3 = Window.GetWindow(root);
+        // Get the window from a UI element (when available):
+        //var window3 = Window.GetWindow(root);
         #endregion
     }
 
