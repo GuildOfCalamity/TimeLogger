@@ -34,6 +34,16 @@ public class MainViewModel : INotifyPropertyChanged
                 PopulateInputsFromSelected(value);
         }
     }
+    DateTime _newEntryDate = DateTime.Now;
+    public DateTime NewEntryDate
+    {
+        get => _newEntryDate;
+        set
+        {
+            _newEntryDate = value;
+            Notify();
+        }
+    }
     public string TodayTotalDisplay
     {
         get
@@ -167,8 +177,8 @@ public class MainViewModel : INotifyPropertyChanged
             Description = DescriptionInput,
             Url = !string.IsNullOrWhiteSpace(UrlInput) ? UrlInput : DefaultUrl,
             TimeSpent = WorkTimeParser.Parse(TimeInput),
-            Date = DateTime.Now // Date = DateTime.Today
-        };
+            Date = NewEntryDate  // Date = DateTime.Now // Date = DateTime.Today
+        }; 
 
         #region [Duplicate Check]
         bool isDuplicate = Entries.Any(e =>
