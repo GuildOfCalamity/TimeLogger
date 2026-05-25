@@ -201,6 +201,8 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+
+
         </Style>
         <Style TargetType="{x:Type GridSplitter}">
             <Setter Property="Background" Value="Transparent" />
@@ -339,7 +341,12 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <!--  [Global] pressing Enter will add a new entry  -->
+    <!--<Window.InputBindings>
+        <KeyBinding Key="Enter" Command="{Binding AddEntryCommand}" />
+    </Window.InputBindings>-->
+
+    <Grid x:Name="root">
         <Grid.RowDefinitions>
             <!--  Input Pane  -->
             <RowDefinition Height="Auto" />
@@ -359,18 +366,30 @@
                     Content="Task Description"
                     FontSize="16"
                     Foreground="{StaticResource BlueBrushLinear}" />
-                <TextBox Text="{Binding DescriptionInput, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding DescriptionInput, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding AddEntryCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
                 <Label
                     Content="Work Item URL"
                     FontSize="16"
                     Foreground="{StaticResource BlueBrushLinear}" />
 
-                <TextBox Text="{Binding UrlInput, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding UrlInput, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding AddEntryCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
                 <Label
                     Content="Time (e.g., 1d 2h 30m)"
                     FontSize="16"
                     Foreground="{StaticResource BlueBrushLinear}" />
-                <TextBox Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding AddEntryCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
                 <Button
                     Height="36"
                     Margin="0,8,0,0"

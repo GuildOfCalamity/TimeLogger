@@ -348,7 +348,11 @@
                 Content="Task Description"
                 FontSize="16"
                 Foreground="{StaticResource BlueBrushLinear}" />
-            <TextBox Margin="0,0,0,10" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,10" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding SaveCommand}" />
+                </TextBox.InputBindings>
+            </TextBox>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Vertical">
@@ -356,7 +360,11 @@
                 Content="Work Item URL"
                 FontSize="16"
                 Foreground="{StaticResource BlueBrushLinear}" />
-            <TextBox Margin="0,0,0,10" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,10" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding SaveCommand}" />
+                </TextBox.InputBindings>
+            </TextBox>
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Vertical">
@@ -364,7 +372,11 @@
                 Content="Time (e.g., 1d 2h 30m)"
                 FontSize="16"
                 Foreground="{StaticResource BlueBrushLinear}" />
-            <TextBox Margin="0,0,0,10" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Margin="0,0,0,10" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding SaveCommand}" />
+                </TextBox.InputBindings>
+            </TextBox>
         </StackPanel>
 
         <StackPanel
