@@ -4,7 +4,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using TimeLogger.Services;
 using TimeLogger.ViewModels;
-using ZDarkTheme.Wpf;
 
 namespace TimeLogger;
 

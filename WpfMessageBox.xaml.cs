@@ -11,6 +11,7 @@ public partial class WpfMessageBox : Window
     public WpfMessageBox()
     {
         InitializeComponent();
+        //SourceInitialized += (s, e) => DarkTitleBar.Apply(this); // if not using XAML approach
     }
 
     /// <summary>
