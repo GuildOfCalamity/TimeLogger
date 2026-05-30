@@ -10,7 +10,7 @@ namespace TimeLogger.Behaviors;
 /// <summary>
 /// I've implemented this behavior in two ways: as a Microsoft.Xaml.Behaviors NuGet package behavior (SwipeBehavior) and as a home-brew attached property (SwipeToDeleteOrEditBehavior).
 /// </summary>
-public class SwipeBehavior : Behavior<System.Windows.FrameworkElement>
+public class SwipeBehavior : Behavior<FrameworkElement>
 {
     #region [Properties]
     System.Windows.Point _start;
@@ -44,6 +44,7 @@ public class SwipeBehavior : Behavior<System.Windows.FrameworkElement>
         AssociatedObject.PreviewMouseLeftButtonDown += OnDown;
         AssociatedObject.PreviewMouseMove += OnMove;
         AssociatedObject.PreviewMouseLeftButtonUp += OnUp;
+        //AssociatedObject.AddHandler(UIElement.PreviewMouseLeftButtonUpEvent, new MouseButtonEventHandler(OnUp), true /* listen even if handled */);
 
         if (AssociatedObject.RenderTransform is not TranslateTransform)
             AssociatedObject.RenderTransform = new TranslateTransform();

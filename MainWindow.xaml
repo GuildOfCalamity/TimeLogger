@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:TimeLogger.Behaviors"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:TimeLogger"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,8 +12,7 @@
     Background="#181818"
     FontFamily="Aptos Mono"
     Icon="/AppIcon.ico"
-    WindowStartupLocation="CenterScreen"
-    mc:Ignorable="d">
+    WindowStartupLocation="CenterScreen">
 
     <Window.Triggers>
         <EventTrigger RoutedEvent="Window.Loaded">
@@ -56,7 +54,7 @@
                     Content="Task Description"
                     FontSize="16"
                     Foreground="{StaticResource BlueBrushLinear}" />
-                <TextBox Text="{Binding DescriptionInput, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox x:Name="description" Text="{Binding DescriptionInput, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding AddEntryCommand}" />
                     </TextBox.InputBindings>
@@ -143,6 +141,10 @@
                 Foreground="White"
                 ItemsSource="{Binding Entries}"
                 SelectedItem="{Binding SelectedEntry, Mode=TwoWay}">
+
+                <!--<i:Interaction.Behaviors>
+                    <behaviors:DragReorderBehavior />
+                </i:Interaction.Behaviors>-->
 
                 <!--#region [Swipe Item Template using code-behind]-->
                 <!--
@@ -241,6 +243,13 @@
                 -->
                 <!--#endregion-->
 
+                <!--  DoubleClick Editing  -->
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding DataContext.DoubleClickCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
                 <!--#region [Swipe Item Template using DP behavior]-->
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -323,7 +332,11 @@
                                             Cursor="Hand"
                                             Foreground="#7FAAFF"
                                             Text="{Binding Url}"
-                                            TextDecorations="Underline" />
+                                            TextDecorations="Underline">
+                                            <i:Interaction.Behaviors>
+                                                <behaviors:ClickToOpenUrlBehavior />
+                                            </i:Interaction.Behaviors>
+                                        </TextBlock>
                                         <TextBlock
                                             Margin="0,4,0,0"
                                             Foreground="#4CAF50"
