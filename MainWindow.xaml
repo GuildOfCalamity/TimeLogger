@@ -10,19 +10,10 @@
     Title="TimeLogger"
     Width="1000"
     Height="750"
+    Background="#181818"
     FontFamily="Aptos Mono"
     Icon="/AppIcon.ico"
     WindowStartupLocation="CenterScreen">
-
-    <Window.Background>
-        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-            <LinearGradientBrush.GradientStops>
-                <GradientStop Offset="0" Color="#101010" />
-                <GradientStop Offset="0.5" Color="#303030" />
-                <GradientStop Offset="1" Color="#202020" />
-            </LinearGradientBrush.GradientStops>
-        </LinearGradientBrush>
-    </Window.Background>
 
     <Window.Triggers>
         <EventTrigger RoutedEvent="Window.Loaded">
@@ -59,9 +50,11 @@
                 <BeginStoryboard>
                     <Storyboard Timeline.DesiredFrameRate="60">
                         <ThicknessAnimation
+                            EasingFunction="{StaticResource CubicEase}"
                             Storyboard.TargetProperty="Margin"
                             From="0,-500,0,0"
                             To="0"
+                            BeginTime="0:0:0"
                             Duration="0:0:0.6" />
                     </Storyboard>
                 </BeginStoryboard>

@@ -40,10 +40,11 @@
                 <BeginStoryboard>
                     <Storyboard Timeline.DesiredFrameRate="60">
                         <ThicknessAnimation
+                            EasingFunction="{StaticResource ElasticEase}"
                             Storyboard.TargetProperty="Margin"
                             From="0,-200,0,0"
                             To="15"
-                            Duration="0:0:0.4" />
+                            Duration="0:0:0.5" />
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
