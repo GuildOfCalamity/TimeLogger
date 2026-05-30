@@ -35,6 +35,20 @@
             <RowDefinition Height="50" />
         </Grid.RowDefinitions>
 
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard Timeline.DesiredFrameRate="60">
+                        <ThicknessAnimation
+                            Storyboard.TargetProperty="Margin"
+                            From="0,-200,0,0"
+                            To="15"
+                            Duration="0:0:0.4" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
         <StackPanel Grid.Row="0" Orientation="Vertical">
             <Label
                 Content="Task Description"
