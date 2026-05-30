@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
 using TimeLogger.Models;
 using TimeLogger.Services;
@@ -21,6 +22,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand AddEntryCommand { get; }
     public ICommand EditEntryCommand { get; }
     public ICommand DeleteEntryCommand { get; }
+    public ICommand DoubleClickCommand { get; }
     TaskEntry? _selectedEntry;
     public TaskEntry? SelectedEntry
     {
@@ -78,6 +80,7 @@ public class MainViewModel : INotifyPropertyChanged
         AddEntryCommand = new RelayCommand(AddEntry);
         //EditEntryCommand = new RelayCommand(EditSelectedEntry);
         EditEntryCommand = new RelayCommand<TaskEntry>(EditEntry);
+        DoubleClickCommand = new RelayCommand(EditSelectedEntry);
         DeleteEntryCommand = new RelayCommand<TaskEntry>(DeleteEntry);
 
         ConfigManager.OnError += (s, e) =>
@@ -265,7 +268,6 @@ public class MainViewModel : INotifyPropertyChanged
         }
 
         var dialog = new EditEntryWindow();
-
         var vm = new EditEntryViewModel(SelectedEntry, result =>
         {
             dialog.DialogResult = result;

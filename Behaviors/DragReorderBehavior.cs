@@ -29,13 +29,13 @@ public class DragReorderBehavior : Behavior<ListBox>
         AssociatedObject.PreviewDrop -= OnPreviewDrop;
     }
 
-    private void OnMouseDown(object sender, MouseButtonEventArgs e)
+    void OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         _dragStart = e.GetPosition(null);
         _isDragging = false;
     }
 
-    private void OnMouseMove(object sender, MouseEventArgs e)
+    void OnMouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed)
             return;
@@ -57,12 +57,12 @@ public class DragReorderBehavior : Behavior<ListBox>
         }
     }
 
-    private void OnMouseUp(object sender, MouseButtonEventArgs e)
+    void OnMouseUp(object sender, MouseButtonEventArgs e)
     {
         _isDragging = false;
     }
 
-    private void OnPreviewDrop(object sender, DragEventArgs e)
+    void OnPreviewDrop(object sender, DragEventArgs e)
     {
         var listBox = AssociatedObject;
         var draggedItem = e.Data.GetData(typeof(object));
@@ -83,14 +83,18 @@ public class DragReorderBehavior : Behavior<ListBox>
         }
     }
 
-    private object GetItemUnderMouse(ListBox listBox, Point position)
+    object? GetItemUnderMouse(ListBox listBox, Point position)
     {
         var element = listBox.InputHitTest(position) as DependencyObject;
-        var container = FindAncestor<ListBoxItem>(element);
-        return container?.DataContext;
+        if (element != null)
+        {
+            var container = FindAncestor<ListBoxItem>(element);
+            return container?.DataContext;
+        }
+        return null;
     }
 
-    private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
+    static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
     {
         while (current != null)
         {

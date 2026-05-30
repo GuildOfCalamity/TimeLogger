@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using TimeLogger.Services;
 using TimeLogger.ViewModels;
+using ZDarkTheme.Wpf;
 
 namespace TimeLogger;
 
@@ -12,6 +13,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        //SourceInitialized += (s, e) => DarkTitleBar.Apply(this); // if not using XAML approach
         DataContext = new MainViewModel(new DialogService(this));
         #region [Example of fetching window from separate module]
         // Get the active window on the Dispatcher thread:
@@ -23,6 +25,16 @@ public partial class MainWindow : Window
         // Get the window from a UI element (when available):
         //var window3 = Window.GetWindow(root);
         #endregion
+    }
+
+    public void FireMouseEvent()
+    {
+        Mouse.Capture(null);
+        var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+        {
+            RoutedEvent = UIElement.MouseLeftButtonUpEvent
+        };
+        RaiseEvent(args);
     }
 
     #region [Alternative code-behind technique for swipe behavior]

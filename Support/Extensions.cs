@@ -13,36 +13,10 @@ namespace TimeLogger;
 
 public enum LogLevel { Debug = 0, Info = 1, Warning = 2, Error = 3, Success = 4 }
 
+public enum ColorTilt { Red, Orange, Yellow, Green, Blue, Purple }
+
 public static class Extensions
 {
-    public static string FormatTime(TimeSpan ts)
-    {
-        List<string> parts = new();
-        if (ts.Days > 0) parts.Add($"{ts.Days}d");
-        if (ts.Hours > 0) parts.Add($"{ts.Hours}h");
-        if (ts.Minutes > 0) parts.Add($"{ts.Minutes}m");
-        return parts.Count == 0 ? "0m" : string.Join(" ", parts);
-    }
-
-    public static bool IsSameBusinessWeek(DateTime date)
-    {
-        var today = DateTime.Today;
-        int diff = (int)today.DayOfWeek - (int)DayOfWeek.Monday;
-        if (diff < 0) diff += 7;
-
-        var monday = today.AddDays(-diff);
-        var friday = monday.AddDays(4);
-
-        return date >= monday && date <= friday;
-    }
-
-    public static bool IsSameSevenDayWeek(DateTime date)
-    {
-        var today = DateTime.Today;
-        var sevenDaysAgo = today.AddDays(-6); // inclusive 7‑day window
-        return date.Date >= sevenDaysAgo && date.Date <= today;
-    }
-
     #region [Logger with automatic duplicate checking]
     static HashSet<string> _logCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     static DateTime _logCacheUpdated = DateTime.Now;
@@ -571,6 +545,7 @@ public static class Extensions
     }
     #endregion
 
+    #region [Precision Helpers]
     public const double Epsilon = 0.000000000001;
     public static bool IsZeroOrLess(this double value) => value < Epsilon;
     public static bool IsZero(this double value) => Math.Abs(value) < Epsilon;
@@ -622,6 +597,7 @@ public static class Extensions
     {
         return val.CompareTo(min) < 0 ? min : (val.CompareTo(max) > 0 ? max : val);
     }
+    #endregion
 
     #region [Color Brush Methods]
     public static (byte A, byte R, byte G, byte B) ParseHexColor(string hex)
@@ -899,16 +875,6 @@ public static class Extensions
     }
 
     static double Lerp(double a, double b, double t) => a + (b - a) * t;
-
-    public enum ColorTilt
-    {
-        Red,
-        Orange,
-        Yellow,
-        Green,
-        Blue,
-        Purple
-    }
 
     /// <summary>
     /// Generates a random <see cref="SolidColorBrush"/> based on a given <see cref="ColorTilt"/>.
@@ -1320,7 +1286,7 @@ public static class Extensions
     ///   MessageBox.Show($"The text of the TextBlock of the selected list item: {myTextBlock.Text}");
     /// </code>
     /// </summary>
-    public static TChildItem FindVisualChild<TChildItem>(DependencyObject obj) where TChildItem : DependencyObject
+    public static TChildItem? FindVisualChild<TChildItem>(this DependencyObject obj) where TChildItem : DependencyObject
     {
         for (var i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
         {
@@ -1345,7 +1311,7 @@ public static class Extensions
     /// <summary>
     /// Find & return a WPF control based on its resource key name.
     /// </summary>
-    public static T? FindChild<T>(DependencyObject parent, string childName) where T : FrameworkElement
+    public static T? FindChild<T>(this DependencyObject parent, string childName) where T : FrameworkElement
     {
         if (parent == null)
             return null;
@@ -1397,6 +1363,21 @@ public static class Extensions
     }
 
     /// <summary>
+    /// Find & return the first ancestor of a given type in the visual tree.
+    /// </summary>
+    public static T? FindAncestor<T>(this DependencyObject current) where T : DependencyObject
+    {
+        while (current != null)
+        {
+            if (current is T match)
+                return match;
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Should be called on UI thread only.
     /// </summary>
     public static void HideAllVisualChildren<T>(this UIElementCollection coll) where T : UIElementCollection
@@ -1412,6 +1393,9 @@ public static class Extensions
         }
     }
 
+    /// <summary>
+    /// Should be called on UI thread only.
+    /// </summary>
     public static IEnumerable<Control> GetAllControls<T>(this UIElementCollection coll) where T : UIElementCollection
     {
         // Casting the UIElementCollection into List
@@ -1425,6 +1409,35 @@ public static class Extensions
         }
     }
     #endregion
+
+    #region [General Helpers]
+    public static string FormatTime(TimeSpan ts)
+    {
+        List<string> parts = new();
+        if (ts.Days > 0) parts.Add($"{ts.Days}d");
+        if (ts.Hours > 0) parts.Add($"{ts.Hours}h");
+        if (ts.Minutes > 0) parts.Add($"{ts.Minutes}m");
+        return parts.Count == 0 ? "0m" : string.Join(" ", parts);
+    }
+
+    public static bool IsSameBusinessWeek(DateTime date)
+    {
+        var today = DateTime.Today;
+        int diff = (int)today.DayOfWeek - (int)DayOfWeek.Monday;
+        if (diff < 0) diff += 7;
+
+        var monday = today.AddDays(-diff);
+        var friday = monday.AddDays(4);
+
+        return date >= monday && date <= friday;
+    }
+
+    public static bool IsSameSevenDayWeek(DateTime date)
+    {
+        var today = DateTime.Today;
+        var sevenDaysAgo = today.AddDays(-6); // inclusive 7‑day window
+        return date.Date >= sevenDaysAgo && date.Date <= today;
+    }
 
     /// <summary>
     /// Tries to execute the given <paramref name="action"/> for a maximum of 
@@ -1453,7 +1466,7 @@ public static class Extensions
             }
 
             if (success)
-                break; // Exit the loop if action was successful
+                break; // Exit the loop if successful
         }
         return success;
     }
@@ -1486,8 +1499,9 @@ public static class Extensions
             }
 
             if (success)
-                break;
+                break; // Exit the loop if successful
         }
         return success;
     }
+    #endregion
 }
