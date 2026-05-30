@@ -24,6 +24,15 @@
             EasingMode="EaseInOut" />
 
         <!--#region [Brushes]-->
+        <LinearGradientBrush x:Key="RingsBrush" StartPoint="0,0.5" EndPoint="0.5,1">
+            <GradientBrush.GradientStops>
+                <GradientStopCollection>
+                    <GradientStop Offset="0.0" Color="#F5F5F5" />
+                    <GradientStop Offset="0.5" Color="DodgerBlue" />
+                    <GradientStop Offset="1.0" Color="#0033CD" />
+                </GradientStopCollection>
+            </GradientBrush.GradientStops>
+        </LinearGradientBrush>
         <LinearGradientBrush x:Key="BlueBrushLinear" StartPoint="0,0" EndPoint="0,1">
             <GradientBrush.GradientStops>
                 <GradientStopCollection>
