@@ -108,7 +108,11 @@
                         Height="36"
                         Margin="5,8,12,0"
                         Command="{Binding AddEntryCommand}"
-                        Content="Add Entry" />
+                        Content="Add Entry">
+                        <!--<i:Interaction.Behaviors>
+                            <behaviors:ChangeAngleMouseHoverBehavior />
+                        </i:Interaction.Behaviors>-->
+                    </Button>
                     <DatePicker
                         Grid.Column="1"
                         CalendarStyle="{StaticResource DarkCalendar}"
