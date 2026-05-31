@@ -4,11 +4,251 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using System.Windows.Shapes;
 using Microsoft.Xaml.Behaviors;
 using Microsoft.Xaml.Behaviors.Core;
 
 namespace TimeLogger.Behaviors
 {
+    /// <summary>
+    /// A behavior that creates a wobble effect on a button when the mouse hovers over it.
+    /// </summary>
+    public class WobbleMouseHoverBehavior : Behavior<Button>
+    {
+        bool _isAnimating = false;
+
+        protected override void OnAttached()
+        {
+            base.OnAttached();
+            AssociatedObject.MouseEnter += OnMouseEnter;
+        }
+
+        protected override void OnDetaching()
+        {
+            base.OnDetaching();
+            AssociatedObject.MouseEnter -= OnMouseEnter;
+        }
+
+        void OnMouseEnter(object sender, MouseEventArgs e)
+        {
+            if (_isAnimating)
+                return;
+
+            _isAnimating = true;
+
+            AssociatedObject.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            if (AssociatedObject.RenderTransform is not RotateTransform rotate)
+            {
+                rotate = new RotateTransform(0);
+                AssociatedObject.RenderTransform = rotate;
+            }
+
+            // Create wobble animation
+            var wobble = new DoubleAnimationUsingKeyFrames
+            {
+                Duration = TimeSpan.FromMilliseconds(350)
+            };
+
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(0.0)));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(3, KeyTime.FromPercent(0.2), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(-2, KeyTime.FromPercent(0.45), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(1, KeyTime.FromPercent(0.7), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(1.0), new CubicEase { EasingMode = EasingMode.EaseOut }));
+
+            wobble.Completed += (_, __) =>
+            {
+                rotate.Angle = 0;
+                _isAnimating = false;
+            };
+
+            rotate.BeginAnimation(RotateTransform.AngleProperty, wobble);
+        }
+    }
+
+    /// <summary>
+    /// A behavior that creates a glowing effect around a button when the mouse hovers over it.
+    /// </summary>
+    public class GlowMouseHoverBehavior : Behavior<Button>
+    {
+        bool _isAnimating = false;
+
+        protected override void OnAttached()
+        {
+            base.OnAttached();
+            AssociatedObject.MouseEnter += OnMouseEnter;
+        }
+
+        protected override void OnDetaching()
+        {
+            base.OnDetaching();
+            AssociatedObject.MouseEnter -= OnMouseEnter;
+        }
+
+        void OnMouseEnter(object sender, MouseEventArgs e)
+        {
+            if (_isAnimating)
+                return;
+
+            _isAnimating = true;
+
+            AssociatedObject.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            // Ensure glow effect exists
+            if (AssociatedObject.Effect is not DropShadowEffect shadow)
+            {
+                shadow = new DropShadowEffect
+                {
+                    Color = Colors.DeepSkyBlue,
+                    BlurRadius = 0,
+                    ShadowDepth = 0,
+                    Opacity = 0
+                };
+                AssociatedObject.Effect = shadow;
+            }
+
+            //
+            // Glow/Pulse Animation
+            //
+            var glow = new DoubleAnimationUsingKeyFrames
+            {
+                Duration = TimeSpan.FromMilliseconds(500)
+            };
+
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(0.0)));
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0.8, KeyTime.FromPercent(0.25), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0.4, KeyTime.FromPercent(0.5), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(1.0), new CubicEase { EasingMode = EasingMode.EaseOut }));
+
+            // Blur radius pulse (soft expansion)
+            var blur = new DoubleAnimationUsingKeyFrames
+            {
+                Duration = TimeSpan.FromMilliseconds(500)
+            };
+
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(0.0)));
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(24, KeyTime.FromPercent(0.25), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(12, KeyTime.FromPercent(0.5), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(1.0), new CubicEase { EasingMode = EasingMode.EaseOut }));
+
+            // When glow completes, reset state
+            glow.Completed += (_, __) =>
+            {
+                shadow.Opacity = 0;
+                shadow.BlurRadius = 0;
+                _isAnimating = false;
+            };
+
+            // Start animations
+            shadow.BeginAnimation(DropShadowEffect.OpacityProperty, glow);
+            shadow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, blur);
+        }
+    }
+
+    /// <summary>
+    /// A behavior that combines both the wobble and glow effects when the mouse hovers over a button.
+    /// </summary>
+    public class WobbleGlowMouseHoverBehavior : Behavior<Button>
+    {
+        bool _isAnimating = false;
+
+        protected override void OnAttached()
+        {
+            base.OnAttached();
+            AssociatedObject.MouseEnter += OnMouseEnter;
+        }
+
+        protected override void OnDetaching()
+        {
+            base.OnDetaching();
+            AssociatedObject.MouseEnter -= OnMouseEnter;
+        }
+
+        void OnMouseEnter(object sender, MouseEventArgs e)
+        {
+            if (_isAnimating)
+                return;
+
+            _isAnimating = true;
+
+            AssociatedObject.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            // Ensure rotate transform exists
+            if (AssociatedObject.RenderTransform is not RotateTransform rotate)
+            {
+                rotate = new RotateTransform(0);
+                AssociatedObject.RenderTransform = rotate;
+            }
+
+            // Ensure glow effect exists
+            if (AssociatedObject.Effect is not DropShadowEffect shadow)
+            {
+                shadow = new DropShadowEffect
+                {
+                    Color = Colors.DeepSkyBlue,
+                    BlurRadius = 0,
+                    ShadowDepth = 0,
+                    Opacity = 0
+                };
+                AssociatedObject.Effect = shadow;
+            }
+
+            //
+            // Wobble Animation
+            //
+            var wobble = new DoubleAnimationUsingKeyFrames
+            {
+                Duration = TimeSpan.FromMilliseconds(350)
+            };
+
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(0.0)));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(3, KeyTime.FromPercent(0.2), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(-2, KeyTime.FromPercent(0.45), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(1, KeyTime.FromPercent(0.7), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            wobble.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(1.0), new CubicEase { EasingMode = EasingMode.EaseOut }));
+
+            //
+            // Glow/Pulse Animation
+            //
+            var glow = new DoubleAnimationUsingKeyFrames
+            {
+                Duration = TimeSpan.FromMilliseconds(350)
+            };
+
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(0.0)));
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0.8, KeyTime.FromPercent(0.25), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0.4, KeyTime.FromPercent(0.5), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            glow.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(1.0), new CubicEase { EasingMode = EasingMode.EaseOut }));
+
+            // Blur radius pulse (soft expansion)
+            var blur = new DoubleAnimationUsingKeyFrames
+            {
+                Duration = TimeSpan.FromMilliseconds(350)
+            };
+
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(0.0)));
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(24, KeyTime.FromPercent(0.25), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(12, KeyTime.FromPercent(0.5), new CubicEase { EasingMode = EasingMode.EaseOut }));
+            blur.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(1.0), new CubicEase { EasingMode = EasingMode.EaseOut }));
+
+            // When wobble completes, reset state
+            wobble.Completed += (_, __) =>
+            {
+                rotate.Angle = 0;
+                shadow.Opacity = 0;
+                shadow.BlurRadius = 0;
+                _isAnimating = false;
+            };
+
+            // Start animations
+            rotate.BeginAnimation(RotateTransform.AngleProperty, wobble);
+            shadow.BeginAnimation(DropShadowEffect.OpacityProperty, glow);
+            shadow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, blur);
+        }
+    }
+
     /// <summary>
     /// A behavior that changes the rotation angle of a button when the mouse 
     /// hovers over it, creating a teeter-totter visual effect.

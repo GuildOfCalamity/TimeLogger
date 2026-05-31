@@ -157,7 +157,7 @@
                                         <Storyboard>
                                             <DoubleAnimation
                                                 Storyboard.TargetProperty="(Button.RenderTransform).(ScaleTransform.ScaleX)"
-                                                To="1.03"
+                                                To="1.02"
                                                 Duration="0:0:0.15">
                                                 <DoubleAnimation.EasingFunction>
                                                     <CubicEase EasingMode="EaseOut" />
@@ -165,7 +165,7 @@
                                             </DoubleAnimation>
                                             <DoubleAnimation
                                                 Storyboard.TargetProperty="(Button.RenderTransform).(ScaleTransform.ScaleY)"
-                                                To="1.03"
+                                                To="1.02"
                                                 Duration="0:0:0.15">
                                                 <DoubleAnimation.EasingFunction>
                                                     <CubicEase EasingMode="EaseOut" />

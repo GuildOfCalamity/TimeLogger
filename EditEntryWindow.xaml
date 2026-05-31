@@ -2,7 +2,9 @@
     x:Class="TimeLogger.EditEntryWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:TimeLogger.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:TimeLogger"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:support="clr-namespace:TimeLogger.Support"
@@ -97,11 +99,19 @@
                 Width="100"
                 Margin="0,0,10,0"
                 Command="{Binding SaveCommand}"
-                Content="Save" />
+                Content="Save">
+                <i:Interaction.Behaviors>
+                    <behaviors:WobbleMouseHoverBehavior />
+                </i:Interaction.Behaviors>
+            </Button>
             <Button
                 Width="100"
                 Command="{Binding CancelCommand}"
-                Content="Cancel" />
+                Content="Cancel">
+                <i:Interaction.Behaviors>
+                    <behaviors:WobbleMouseHoverBehavior />
+                </i:Interaction.Behaviors>
+            </Button>
         </StackPanel>
     </Grid>
 
