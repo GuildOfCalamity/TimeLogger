@@ -110,7 +110,11 @@
                         Command="{Binding AddEntryCommand}"
                         Content="Add Entry">
                         <i:Interaction.Behaviors>
-                            <behaviors:GlowMouseHoverBehavior />
+                            <behaviors:GlowMouseHoverBehavior
+                                AnimationDuration="600"
+                                BloomColor="#3498db"
+                                BloomIntensity="30"
+                                TriggerMode="Hover" />
                         </i:Interaction.Behaviors>
                     </Button>
                     <DatePicker
@@ -141,7 +145,7 @@
                         FontSize="24"
                         Foreground="#4CAF50"
                         Text="{Binding TodayTotalDisplay}" />
-                    <Separator />
+                    <Separator Height="4" Background="{StaticResource RingsBrush}" />
                     <TextBlock
                         FontSize="18"
                         Foreground="White"
@@ -151,16 +155,15 @@
                         Foreground="#03A9F4"
                         Text="{Binding WeekTotalDisplay}" />
                 </StackPanel>
-
                 <ctrl:RingSpinner
                     Grid.Column="1"
-                    Width="40"
-                    Height="20"
+                    Width="45"
+                    Height="5"
                     HorizontalAlignment="Center"
                     RingBrush="{StaticResource RingsBrush}"
-                    RingRadius="6"
-                    RingRatio="4"
-                    RingThickness="5" />
+                    RingRadius="2"
+                    RingRatio="2"
+                    RingThickness="3" />
             </Grid>
         </Border>
 

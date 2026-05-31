@@ -18,9 +18,13 @@
 
 ![SwipeDelete](./Screenshot4.png)
 
+> Custom glow decorator control
+
+![Glow](./Screenshot5.png)
+
 > Backing JSON Data
 
-![Data](./Screenshot5.png)
+![Data](./Screenshot6.png)
 
 **Dependencies**
 
