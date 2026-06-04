@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using TimeLogger.Controls;
 using TimeLogger.Models;
 using TimeLogger.Services;
 
@@ -20,6 +22,7 @@ public class MainViewModel : INotifyPropertyChanged
     public string? TimeInput { get; set; }
     public string? DefaultUrl { get; set; }
     public ICommand AddEntryCommand { get; }
+    public ICommand ChartCommand { get; }
     public ICommand EditEntryCommand { get; }
     public ICommand DeleteEntryCommand { get; }
     public ICommand DoubleClickCommand { get; }
@@ -70,6 +73,28 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    List<ChartSeries> _timeSeries = new List<ChartSeries>();
+    public List<ChartSeries> TimeSeries
+    {
+        get => _timeSeries;
+        set
+        {
+            _timeSeries = value;
+            Notify();
+        }
+    }
+
+    bool _chartVisible = false;
+    public bool ChartVisible
+    {
+        get => _chartVisible;
+        set
+        {
+            _chartVisible = value;
+            Notify();
+        }
+    }
     #endregion
 
     #region [Constructor using IDialogService]
@@ -78,6 +103,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _dialogService = dialogService;
         AddEntryCommand = new RelayCommand(AddEntry);
+        ChartCommand = new RelayCommand(ToggleChart);
         //EditEntryCommand = new RelayCommand(EditSelectedEntry);
         EditEntryCommand = new RelayCommand<TaskEntry>(EditEntry);
         DoubleClickCommand = new RelayCommand(EditSelectedEntry);
@@ -109,6 +135,7 @@ public class MainViewModel : INotifyPropertyChanged
             Notify(nameof(WeekTotalDisplay));
         };
     }
+
     #endregion
 
     #region [Business Logic]
@@ -306,4 +333,81 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(WeekTotalDisplay));
     }
     #endregion
+
+    /// <summary>
+    /// <see cref="Controls.CartesianChart"/> event for test call from MainWindow.xaml.cs
+    /// </summary>
+    public void ShowChart(FrameworkElement chartElement, FrameworkElement listElement)
+    {
+        bool useTestData = true;
+
+        if (useTestData)
+        {
+            List<ChartPoint> points = new List<ChartPoint>();
+            for (int i = 1; i < 21; i++)
+            {
+                points.Add(new ChartPoint(DateTime.Now.Add(TimeSpan.FromHours(i)), Random.Shared.Next(3, 11), "hours"));
+            }
+            TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
+        }
+
+        if (TimeSeries == null || TimeSeries.Count == 0)
+        {
+            _dialogService.ShowWarning($"No chart data available, try adding entries first.");
+            return;
+        }
+        if (chartElement == null || listElement == null)
+        {
+            _dialogService.ShowWarning($"No chart or list element found.");
+            return;
+        }
+
+        if (chartElement is CartesianChart chart)
+        {
+            chartElement.Visibility = chartElement.Visibility == Visibility.Visible ? Visibility.Hidden : Visibility.Visible;
+            listElement.Visibility = listElement.Visibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
+            if (chart.Visibility == Visibility.Visible)
+            {
+                //viewer.Visibility = Visibility.Hidden;
+                chart.Redraw();
+            }
+            else
+            {
+                //viewer.Visibility = Visibility.Visible;
+            }
+        }
+    }
+
+    /// <summary>
+    /// <see cref="Controls.CartesianChart"/> event for MVVM
+    /// </summary>
+    void ToggleChart()
+    {
+        bool useTestData = false;
+
+        if (useTestData)
+        {
+            List<ChartPoint> points = new List<ChartPoint>();
+            for (int i = 1; i < 21; i++)
+            {
+                points.Add(new ChartPoint(DateTime.Now.Add(TimeSpan.FromHours(i)), Random.Shared.Next(3, 11), "hours"));
+            }
+            TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
+        }
+        else
+        {
+            if (Entries.Count == 0)
+            {
+                _dialogService.ShowWarning($"No chart data available, try adding entries first.");
+                return;
+            }
+            var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours")).ToList();
+            TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
+            {
+
+                ChartVisible = !ChartVisible;
+            }
+        }
+    }
+
 }

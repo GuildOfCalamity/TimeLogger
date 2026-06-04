@@ -7,6 +7,14 @@
     StartupUri="MainWindow.xaml">
     <Application.Resources>
 
+        <local:BoolToVisibilityConverter x:Key="boolToVisibility" />
+
+        <ImageBrush
+            x:Key="GridBackground"
+            ImageSource="AppIcon.png"
+            Opacity="0.1"
+            Stretch="None" />
+
         <!--#region [Easing Functions]-->
         <SineEase x:Key="SineEase" EasingMode="EaseInOut" />
         <CubicEase x:Key="CubicEase" EasingMode="EaseInOut" />

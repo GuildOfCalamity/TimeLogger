@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Linq;
 using TimeLogger.Services;
 using TimeLogger.ViewModels;
 
@@ -13,6 +14,12 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         //SourceInitialized += (s, e) => DarkTitleBar.Apply(this); // if not using XAML approach
+        //this.PreviewMouseRightButtonDown += (s, e) =>
+        //{
+        //    if (DataContext is not MainViewModel vm)
+        //        return;
+        //    vm.ShowChart(chart, listing);
+        //};
         DataContext = new MainViewModel(new DialogService(this));
         #region [Example of fetching window from separate module]
         // Get the active window on the Dispatcher thread:

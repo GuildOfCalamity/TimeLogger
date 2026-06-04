@@ -17,6 +17,9 @@ public enum ColorTilt { Red, Orange, Yellow, Green, Blue, Purple }
 
 public static class Extensions
 {
+    public static Uri IconEnabled = new Uri(@"Assets\Icon1.png", UriKind.Relative);
+    public static Uri IconDisabled = new Uri(@"Assets\Icon2.png", UriKind.Relative);
+
     #region [Logger with automatic duplicate checking]
     static HashSet<string> _logCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     static DateTime _logCacheUpdated = DateTime.Now;
