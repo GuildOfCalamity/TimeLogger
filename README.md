@@ -26,6 +26,10 @@
 
 ![Data](./Screenshot6.png)
 
+> Additional app settings
+
+![Config](./Screenshot7.png)
+
 **Dependencies**
 
 | Assembly | Version |
