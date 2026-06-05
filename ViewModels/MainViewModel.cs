@@ -36,7 +36,10 @@ public class MainViewModel : INotifyPropertyChanged
             Notify();
 
             if (value != null)
+            {
                 PopulateInputsFromSelected(value);
+                NewEntryDate = value.Date;
+            }
         }
     }
     DateTime _newEntryDate = DateTime.Now;
