@@ -277,21 +277,32 @@ public partial class CartesianChart : UserControl
 
         var pos = e.GetPosition(PART_Canvas);
         var series = Series[0];
-        if (series.Points.Count < 2)
+        if (series.Points == null || series.Points.Count < 2)
             return;
 
         // Find the closest point in X
-        var closest = series.Points.OrderBy(p => Math.Abs(PlotX_Scoped(p.Time) - pos.X)).First();
+        //var closest = series.Points.OrderBy(p => Math.Abs(PlotX_Scoped(p.Time) - pos.X)).First();
+        // Account for stacked series by comparing distance to the actual point, not just the line (items with same DateTime)
+        var closest = series.Points
+            .OrderBy(p =>
+            {
+                double dx = PlotX_Scoped(p.Time) - pos.X;
+                double dy = PlotY_Scoped(p.Value) - pos.Y;
+                return dx * dx + dy * dy; // squared distance (faster)
+            })
+            .First();
+
+
         if (closest == null)
             return;
 
-        // Compute the Y position of the line at that point
-        double lineY = PlotY_Scoped(closest.Value);
+        double xs = PlotX_Scoped(closest.Time);
+        double ys = PlotY_Scoped(closest.Value);
+        double dx = Math.Abs(xs - pos.X);
+        double dy = Math.Abs(ys - pos.Y);
+        double distance = Math.Sqrt(dx * dx + dy * dy);
 
-        // Distance from mouse to line
-        double dy = Math.Abs(lineY - pos.Y);
-
-        if (dy <= HitThreshold)
+        if (distance <= HitThreshold)
         {
             // Position highlight dot
             double x = PlotX_Scoped(closest.Time);
