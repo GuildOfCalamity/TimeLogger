@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.DirectoryServices.ActiveDirectory;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+
 using TimeLogger.Controls;
 using TimeLogger.Models;
 using TimeLogger.Services;
@@ -334,14 +334,15 @@ public class MainViewModel : INotifyPropertyChanged
     }
     #endregion
 
+    #region [Chart Triggers]
     /// <summary>
     /// <see cref="Controls.CartesianChart"/> event for test call from MainWindow.xaml.cs
     /// </summary>
     public void ShowChart(FrameworkElement chartElement, FrameworkElement listElement)
     {
-        bool useTestData = true;
+        bool useRandomData = true;
 
-        if (useTestData)
+        if (useRandomData)
         {
             List<ChartPoint> points = new List<ChartPoint>();
             for (int i = 1; i < 21; i++)
@@ -383,9 +384,9 @@ public class MainViewModel : INotifyPropertyChanged
     /// </summary>
     void ToggleChart()
     {
-        bool useTestData = false;
+        bool useRandomData = false;
 
-        if (useTestData)
+        if (useRandomData)
         {
             List<ChartPoint> points = new List<ChartPoint>();
             for (int i = 1; i < 21; i++)
@@ -409,5 +410,5 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
-
+    #endregion
 }

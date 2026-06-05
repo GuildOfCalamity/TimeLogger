@@ -102,7 +102,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="110" />
                     </Grid.ColumnDefinitions>
                     <Button
                         Grid.Column="0"
@@ -134,7 +134,9 @@
                     </Button>
                     <DatePicker
                         Grid.Column="2"
-                        CalendarStyle="{StaticResource DarkCalendar}"
+                        Height="26"
+                        Margin="0,7,1,0"
+                        Style="{StaticResource DatePickerBaseStyle}"
                         SelectedDate="{Binding NewEntryDate, Mode=TwoWay}"
                         SelectedDateFormat="Short" />
                 </Grid>
