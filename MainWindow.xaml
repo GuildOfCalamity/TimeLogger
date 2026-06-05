@@ -102,7 +102,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="120" />
                     </Grid.ColumnDefinitions>
                     <Button
                         Grid.Column="0"
@@ -134,11 +134,11 @@
                     </Button>
                     <DatePicker
                         Grid.Column="2"
-                        Height="26"
+                        Height="36"
                         Margin="0,7,1,0"
-                        Style="{StaticResource DatePickerBaseStyle}"
                         SelectedDate="{Binding NewEntryDate, Mode=TwoWay}"
-                        SelectedDateFormat="Short" />
+                        SelectedDateFormat="Short"
+                        Style="{StaticResource DatePickerBaseStyle}" />
                 </Grid>
             </StackPanel>
         </Border>
