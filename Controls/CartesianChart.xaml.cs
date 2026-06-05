@@ -14,7 +14,7 @@ public partial class CartesianChart : UserControl
     #region [Properties]
     bool _constantTooltip = false;
     bool _animating = false;
-    const double HitThreshold = 14.0;     // in pixels
+    const double HitThreshold = 15.0;     // in pixels
     long _minX; long _maxX; double _maxY; // control-wide scope
 
     public List<ChartSeries> Series
@@ -317,7 +317,7 @@ public partial class CartesianChart : UserControl
 
             // TODO: Add date/time/uom formatting to ChartSeries model
             //PART_TooltipText.Text = $"{closest.Time:t}\n{closest.Value:0.00} in";
-            PART_TooltipText.Text = $"{closest.Time.ToString("MM/dd h:mm tt")}\n{closest.Value:0.00} {closest.Uom}";
+            PART_TooltipText.Text = $"{closest.Time.ToString("ddd MMM dd, yyyy")}\n{closest.Title}\n{closest.Value:0.00} {closest.Uom}";
 
             if (PART_Tooltip.Visibility != Visibility.Visible)
             {
@@ -365,7 +365,7 @@ public partial class CartesianChart : UserControl
 
         PART_Tooltip.Visibility = Visibility.Hidden;
 
-        PART_TooltipText.Text = $"{closest.Time:t}\n{closest.Value:0.00} {closest.Uom}";
+        PART_TooltipText.Text = $"{closest.Time.ToString("ddd MMM dd, yyyy")}\n{closest.Title}\n{closest.Value:0.00} {closest.Uom}";
 
         #region [Centering Tooltip]
         //double x = Math.Min(pos.X + 10, ActualWidth - PART_Tooltip.ActualWidth - 10);

@@ -347,7 +347,7 @@ public class MainViewModel : INotifyPropertyChanged
             List<ChartPoint> points = new List<ChartPoint>();
             for (int i = 1; i < 21; i++)
             {
-                points.Add(new ChartPoint(DateTime.Now.Add(TimeSpan.FromHours(i)), Random.Shared.Next(3, 11), "hours"));
+                points.Add(new ChartPoint(DateTime.Now.Add(TimeSpan.FromHours(i)), Random.Shared.Next(3, 11), "hours", $"Test Entry #{i}"));
             }
             TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
         }
@@ -391,7 +391,7 @@ public class MainViewModel : INotifyPropertyChanged
             List<ChartPoint> points = new List<ChartPoint>();
             for (int i = 1; i < 21; i++)
             {
-                points.Add(new ChartPoint(DateTime.Now.Add(TimeSpan.FromHours(i)), Random.Shared.Next(3, 11), "hours"));
+                points.Add(new ChartPoint(DateTime.Now.Add(TimeSpan.FromHours(i)), Random.Shared.Next(3, 11), "hours", $"Test Entry #{i}"));
             }
             TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
         }
@@ -402,7 +402,7 @@ public class MainViewModel : INotifyPropertyChanged
                 _dialogService.ShowWarning($"No chart data available, try adding entries first.");
                 return;
             }
-            var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours")).ToList();
+            var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList();
             TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
             {
 

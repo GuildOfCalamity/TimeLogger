@@ -8,11 +8,13 @@ namespace TimeLogger.Models
         public DateTime Time { get; set; }
         public double Value { get; set; }
         public string Uom { get; set; } // unit of measure
-        public ChartPoint(DateTime time, double value, string uom)
+        public string Title { get; set; }
+        public ChartPoint(DateTime time, double value, string uom, string title)
         {
             Time = time;
             Value = value;
             Uom = uom;
+            Title = title;
         }
     }
 
