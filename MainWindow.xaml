@@ -16,6 +16,7 @@
     Background="#181818"
     FontFamily="Aptos Mono"
     Icon="/AppIcon.ico"
+    Loaded="TimeWindow_Loaded"
     WindowStartupLocation="CenterScreen">
 
     <Window.Triggers>
@@ -473,6 +474,13 @@
             Series="{Binding TimeSeries}"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}}" />
 
+        <ctrl:SweepChart
+            x:Name="sweep"
+            Grid.Row="1"
+            Margin="0"
+            DayAmount="14.0"
+            SweepPixelsPerSecond="100"
+            Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}, ConverterParameter=reverse}" />
     </Grid>
 
 </Window>

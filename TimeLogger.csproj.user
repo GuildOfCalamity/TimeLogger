@@ -5,6 +5,9 @@
     <Compile Update="Controls\CartesianChart.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Controls\SweepChart.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Controls\RingSpinner.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -44,6 +44,24 @@ public partial class MainWindow : Window
         //};
     }
 
+    void TimeWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        //sweep.ItemsSource = new ObservableCollection<Models.ChartPoint>();
+        //for (int i = 0; i < 500; i++)
+        //{
+        //    sweep.ItemsSource.Add(
+        //        new Models.ChartPoint(
+        //            DateTime.Today.AddDays(i * Random.Shared.NextDouble()), 
+        //            Random.Shared.Next(2, 100), 
+        //            $"hours", 
+        //            $"Test {i}"));
+        //}
+
+        if (DataContext is not MainViewModel vm)
+                 return;
+            vm?.SetupSweepChart(sweep);
+    }
+
     public void FireMouseEvent()
     {
         Mouse.Capture(null);

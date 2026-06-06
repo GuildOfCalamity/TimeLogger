@@ -458,5 +458,15 @@ public class MainViewModel : INotifyPropertyChanged
             ChartVisible = !ChartVisible;
         }
     }
+
+    public void SetupSweepChart(SweepChart sweep)
+    {
+        var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList();
+        sweep.ItemsSource = new ObservableCollection<Models.ChartPoint>();
+        foreach (var cp in points)
+        {
+            sweep.ItemsSource.Add(cp);
+        }
+    }
     #endregion
 }
