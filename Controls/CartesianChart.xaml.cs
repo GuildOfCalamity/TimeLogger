@@ -17,6 +17,8 @@ public partial class CartesianChart : UserControl
     const double HitThreshold = 15.0;     // in pixels
     long _minX; long _maxX; double _maxY; // control-wide scope
 
+    public event EventHandler<ChartPointClickedEventArgs>? PointClicked;
+
     public List<ChartSeries> Series
     {
         get => (List<ChartSeries>)GetValue(SeriesProperty);
@@ -31,7 +33,6 @@ public partial class CartesianChart : UserControl
 
     DoubleAnimation? _fadeOutTooltip = null;
 
-    public event EventHandler<ChartPointClickedEventArgs>? PointClicked;
     #endregion
 
     public CartesianChart()
@@ -54,9 +55,28 @@ public partial class CartesianChart : UserControl
             {
                 var pos = e.GetPosition(PART_Canvas);
                 var series = Series[0];
-                if (series != null)
+                if (series.Points == null || series.Points.Count == 0)
+                    return;
+
+                // Find the closest point using 2D distance
+                var closest = series.Points
+                    .OrderBy(p =>
+                    {
+                        double dx = PlotX_Scoped(p.Time) - pos.X;
+                        double dy = PlotY_Scoped(p.Value) - pos.Y;
+                        return dx * dx + dy * dy;
+                    })
+                    .First();
+
+                double x = PlotX_Scoped(closest.Time);
+                double y = PlotY_Scoped(closest.Value);
+
+                double dx2 = (x - pos.X) * (x - pos.X);
+                double dy2 = (y - pos.Y) * (y - pos.Y);
+                double distance = Math.Sqrt(dx2 + dy2);
+
+                if (distance <= HitThreshold)
                 {
-                    var closest = series.Points.OrderBy(p => Math.Abs(PlotX_Scoped(p.Time) - pos.X)).First();
                     PointClicked?.Invoke(this, new ChartPointClickedEventArgs(closest));
                 }
             }

@@ -31,6 +31,14 @@ public partial class MainWindow : Window
         // Get the window from a UI element (when available):
         //var window3 = Window.GetWindow(root);
         #endregion
+
+        chart.PointClicked += (_, args) =>
+        {
+            var cp = args.Point;
+            if (DataContext is not MainViewModel vm)
+                 return;
+            vm?.SetPointSelection(cp);
+        };
     }
 
     public void FireMouseEvent()

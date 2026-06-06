@@ -339,6 +339,22 @@ public class MainViewModel : INotifyPropertyChanged
 
     #region [Chart Triggers]
     /// <summary>
+    /// <see cref="Controls.CartesianChart"/> event for selection from MainWindow.xaml.cs
+    /// </summary>
+    public void SetPointSelection(ChartPoint c)
+    {
+        try
+        {
+            var selection = Entries.Where(e => e.Date == c.Time && e.Description == c.Title).First();
+            if (selection == null)
+                return;
+
+            SelectedEntry = selection;
+        }
+        catch { }
+    }
+
+    /// <summary>
     /// <see cref="Controls.CartesianChart"/> event for test call from MainWindow.xaml.cs
     /// </summary>
     public void ShowChart(FrameworkElement chartElement, FrameworkElement listElement)
