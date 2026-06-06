@@ -59,7 +59,13 @@ public partial class MainWindow : Window
 
         if (DataContext is not MainViewModel vm)
                  return;
+
+        // Alow some time for entries to load and the UI to render before starting the sweep chart.
+        this.Dispatcher.BeginInvoke(async () =>
+        {
+            await Task.Delay(1000);
             vm?.SetupSweepChart(sweep);
+        });
     }
 
     public void FireMouseEvent()
