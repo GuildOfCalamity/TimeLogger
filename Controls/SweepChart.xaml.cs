@@ -16,6 +16,12 @@ namespace TimeLogger.Controls
         double _sweepX;
         bool _drawBackground = false;
         DateTime _lastFrame;
+        readonly Pen gridPen = new Pen(new SolidColorBrush(Color.FromArgb(130, 35, 35, 35)), 1);
+        readonly Pen glowPen = new Pen(new SolidColorBrush(Color.FromArgb(70, 0, 148, 255)), 6);
+        readonly Pen tracePen = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 2);
+        readonly Pen sweepPen1 = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 2);
+        readonly Pen sweepPen2 = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 1);
+        readonly SolidColorBrush bkgndBrush = new SolidColorBrush(Color.FromArgb(150, 0, 0, 0));
         readonly List<(Point ScreenPoint, ChartPoint DataPoint)> _screenPoints = new List<(Point, ChartPoint)>();
         public event EventHandler<ChartPointClickedEventArgs>? ChartPointClicked;
 
@@ -111,7 +117,7 @@ namespace TimeLogger.Controls
                 return;
 
             if (_drawBackground)
-                dc.DrawRectangle(new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), null, new Rect(0, 0, width, height));
+                dc.DrawRectangle(bkgndBrush, null, new Rect(0, 0, width, height));
 
             DrawGrid(dc);
 
@@ -152,27 +158,22 @@ namespace TimeLogger.Controls
 
         void DrawGrid(DrawingContext dc)
         {
-            Pen pen = new Pen(new SolidColorBrush(Color.FromArgb(130, 35, 35, 35)), 1);
-
             for (int x = 0; x < ActualWidth; x += 50)
             {
-                dc.DrawLine(pen, new Point(x, 0), new Point(x, ActualHeight));
+                dc.DrawLine(gridPen, new Point(x, 0), new Point(x, ActualHeight));
             }
-
             for (int y = 0; y < ActualHeight; y += 50)
             {
-                dc.DrawLine(pen, new Point(0, y), new Point(ActualWidth, y));
+                dc.DrawLine(gridPen, new Point(0, y), new Point(ActualWidth, y));
             }
         }
 
         void DrawTrace(DrawingContext dc)
         {
             StreamGeometry geometry = new StreamGeometry();
-
             using (StreamGeometryContext ctx = geometry.Open())
             {
                 bool started = false;
-
                 foreach (var item in _screenPoints)
                 {
                     if (item.ScreenPoint.X > _sweepX)
@@ -189,20 +190,14 @@ namespace TimeLogger.Controls
                     }
                 }
             }
-
             geometry.Freeze();
-
-            Pen glowPen = new Pen(new SolidColorBrush(Color.FromArgb(50, 0, 148, 255)), 8);
-            Pen tracePen = new Pen(new SolidColorBrush(Color.FromArgb(100, 0, 108, 255)), 2);
             dc.DrawGeometry(null, glowPen, geometry);
             dc.DrawGeometry(null, tracePen, geometry);
         }
 
         void DrawSweepLine(DrawingContext dc)
         {
-            Pen sweepPen = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 2);
-            dc.DrawLine(sweepPen, new Point(_sweepX, 0), new Point(_sweepX, ActualHeight));
-            Pen sweepPen2 = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 1);
+            dc.DrawLine(sweepPen1, new Point(_sweepX, 0), new Point(_sweepX, ActualHeight));
             dc.DrawLine(sweepPen2, new Point(_sweepX-1, 0), new Point(_sweepX-1, ActualHeight));
         }
 
