@@ -469,6 +469,7 @@
             x:Name="chart"
             Grid.Row="2"
             Margin="10"
+            PointClickedCommand="{Binding ChartPointSelectedCommand}"
             Series="{Binding TimeSeries}"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}}" />
 

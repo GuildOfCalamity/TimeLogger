@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Xml.Linq;
+
 using TimeLogger.Services;
 using TimeLogger.ViewModels;
 
@@ -20,7 +20,9 @@ public partial class MainWindow : Window
         //        return;
         //    vm.ShowChart(chart, listing);
         //};
+        
         DataContext = new MainViewModel(new DialogService(this));
+
         #region [Example of fetching window from separate module]
         // Get the active window on the Dispatcher thread:
         //var window1 = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
@@ -32,13 +34,14 @@ public partial class MainWindow : Window
         //var window3 = Window.GetWindow(root);
         #endregion
 
-        chart.PointClicked += (_, args) =>
-        {
-            var cp = args.Point;
-            if (DataContext is not MainViewModel vm)
-                 return;
-            vm?.SetPointSelection(cp);
-        };
+        // Converted this to DependencyProperty and bind to it from XAML to avoid code-behind.
+        //chart.PointClicked += (_, args) =>
+        //{
+        //    var cp = args.Point;
+        //    if (DataContext is not MainViewModel vm)
+        //         return;
+        //    vm?.SetPointSelection(cp);
+        //};
     }
 
     public void FireMouseEvent()

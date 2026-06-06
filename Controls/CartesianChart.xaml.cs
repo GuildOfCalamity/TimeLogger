@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+
 using TimeLogger.Models;
 
 namespace TimeLogger.Controls;
@@ -16,6 +17,7 @@ public partial class CartesianChart : UserControl
     bool _animating = false;
     const double HitThreshold = 15.0;     // in pixels
     long _minX; long _maxX; double _maxY; // control-wide scope
+    DoubleAnimation? _fadeOutTooltip = null;
 
     public event EventHandler<ChartPointClickedEventArgs>? PointClicked;
 
@@ -31,8 +33,25 @@ public partial class CartesianChart : UserControl
         typeof(CartesianChart),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    DoubleAnimation? _fadeOutTooltip = null;
 
+    public static readonly DependencyProperty PointClickedCommandProperty = DependencyProperty.Register(
+        nameof(PointClickedCommand),
+        typeof(ICommand),
+        typeof(CartesianChart),
+        new PropertyMetadata(null));
+
+    public ICommand PointClickedCommand
+    {
+        get => (ICommand)GetValue(PointClickedCommandProperty);
+        set => SetValue(PointClickedCommandProperty, value);
+    }
+
+
+    void OnGraphPointClicked(ChartPoint point)
+    {
+        if (PointClickedCommand?.CanExecute(point) == true)
+            PointClickedCommand?.Execute(point);
+    }
     #endregion
 
     public CartesianChart()
@@ -77,7 +96,10 @@ public partial class CartesianChart : UserControl
 
                 if (distance <= HitThreshold)
                 {
+                    // Fire event for any code-behind handlers
                     PointClicked?.Invoke(this, new ChartPointClickedEventArgs(closest));
+                    // Fire event for any bound ICommand handlers
+                    OnGraphPointClicked(closest);
                 }
             }
         };
@@ -515,7 +537,7 @@ public partial class CartesianChart : UserControl
     #endregion
 }
 
-#region [Mouse Click Event]
+#region [Click Event]
 public class ChartPointClickedEventArgs : EventArgs
 {
     public ChartPoint Point { get; }

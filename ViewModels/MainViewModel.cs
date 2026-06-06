@@ -21,11 +21,14 @@ public class MainViewModel : INotifyPropertyChanged
     public string? UrlInput { get; set; }
     public string? TimeInput { get; set; }
     public string? DefaultUrl { get; set; }
+
     public ICommand AddEntryCommand { get; }
     public ICommand ChartCommand { get; }
     public ICommand EditEntryCommand { get; }
     public ICommand DeleteEntryCommand { get; }
     public ICommand DoubleClickCommand { get; }
+    public ICommand ChartPointSelectedCommand { get; }
+
     TaskEntry? _selectedEntry;
     public TaskEntry? SelectedEntry
     {
@@ -111,6 +114,7 @@ public class MainViewModel : INotifyPropertyChanged
         EditEntryCommand = new RelayCommand<TaskEntry>(EditEntry);
         DoubleClickCommand = new RelayCommand(EditSelectedEntry);
         DeleteEntryCommand = new RelayCommand<TaskEntry>(DeleteEntry);
+        ChartPointSelectedCommand = new RelayCommand<ChartPoint>(OnChartPointSelected);
 
         ConfigManager.OnError += (s, e) =>
         {
@@ -138,7 +142,6 @@ public class MainViewModel : INotifyPropertyChanged
             Notify(nameof(WeekTotalDisplay));
         };
     }
-
     #endregion
 
     #region [Business Logic]
@@ -237,6 +240,26 @@ public class MainViewModel : INotifyPropertyChanged
             index++;
 
         Entries.Insert(index, entry);
+        #endregion
+
+        #region [Update chart]
+        TimeSeries = new List<ChartSeries> 
+        { 
+            new ChartSeries 
+            { 
+                Points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList()
+            } 
+        };
+        if (!ChartVisible)
+        {
+            ChartVisible = true;
+        }
+        else
+        {
+            // If chart is already visible, trigger redraw by toggling visibility
+            ChartVisible = false;
+            ChartVisible = true;
+        }
         #endregion
 
         #region [Clear out previous]
@@ -339,6 +362,22 @@ public class MainViewModel : INotifyPropertyChanged
 
     #region [Chart Triggers]
     /// <summary>
+    /// <see cref="Controls.CartesianChart"/> event using <see cref="RelayCommand{T}"/>
+    /// </summary>
+    void OnChartPointSelected(ChartPoint cp)
+    {
+        try
+        {
+            var selection = Entries.Where(e => e.Date == cp.Time && e.Description == cp.Title).First();
+            if (selection == null)
+                return;
+
+            SelectedEntry = selection;
+        }
+        catch { }
+    }
+
+    /// <summary>
     /// <see cref="Controls.CartesianChart"/> event for selection from MainWindow.xaml.cs
     /// </summary>
     public void SetPointSelection(ChartPoint c)
@@ -387,14 +426,7 @@ public class MainViewModel : INotifyPropertyChanged
             chartElement.Visibility = chartElement.Visibility == Visibility.Visible ? Visibility.Hidden : Visibility.Visible;
             listElement.Visibility = listElement.Visibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
             if (chart.Visibility == Visibility.Visible)
-            {
-                //viewer.Visibility = Visibility.Hidden;
                 chart.Redraw();
-            }
-            else
-            {
-                //viewer.Visibility = Visibility.Visible;
-            }
         }
     }
 
@@ -423,10 +455,7 @@ public class MainViewModel : INotifyPropertyChanged
             }
             var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList();
             TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
-            {
-
-                ChartVisible = !ChartVisible;
-            }
+            ChartVisible = !ChartVisible;
         }
     }
     #endregion
