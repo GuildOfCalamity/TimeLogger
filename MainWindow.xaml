@@ -479,7 +479,7 @@
             Grid.Row="1"
             Margin="0,0,1,0"
             DayAmount="14.0"
-            SweepPixelsPerSecond="100"
+            SweepPixelsPerSecond="{Binding SweepSpeed, Mode=OneWay}"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}, ConverterParameter=reverse}" />
     </Grid>
 
