@@ -479,7 +479,12 @@
             Grid.Row="1"
             Margin="0,0,1,0"
             DayAmount="14.0"
+            SweepPen1Color="#501E90FF"
+            SweepPen2Color="#801E90FF"
+            GridPenColor="#50404040"
+            GlowPenColor="#501E90FF"
             SweepPixelsPerSecond="{Binding SweepSpeed, Mode=OneWay}"
+            TracePenColor="#801E90FF"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}, ConverterParameter=reverse}" />
     </Grid>
 

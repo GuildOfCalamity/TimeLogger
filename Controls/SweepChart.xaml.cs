@@ -14,14 +14,13 @@ namespace TimeLogger.Controls
     public partial class SweepChart : UserControl
     {
         double _sweepX;
-        bool _drawBackground = false;
         DateTime _lastFrame;
-        readonly Pen gridPen = new Pen(new SolidColorBrush(Color.FromArgb(130, 35, 35, 35)), 1);
-        readonly Pen glowPen = new Pen(new SolidColorBrush(Color.FromArgb(70, 0, 148, 255)), 6);
-        readonly Pen tracePen = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 2);
-        readonly Pen sweepPen1 = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 2);
-        readonly Pen sweepPen2 = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 1);
-        readonly SolidColorBrush bkgndBrush = new SolidColorBrush(Color.FromArgb(150, 0, 0, 0));
+        Pen gridPen = new Pen(new SolidColorBrush(Color.FromArgb(130, 35, 35, 35)), 1);
+        Pen glowPen = new Pen(new SolidColorBrush(Color.FromArgb(70, 0, 148, 255)), 6);
+        Pen tracePen = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 2);
+        Pen sweepPen1 = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 2);
+        Pen sweepPen2 = new Pen(new SolidColorBrush(Color.FromArgb(110, 0, 108, 255)), 1);
+        SolidColorBrush bkgndBrush = new SolidColorBrush(Color.FromArgb(150, 0, 0, 0));
         readonly List<(Point ScreenPoint, ChartPoint DataPoint)> _screenPoints = new List<(Point, ChartPoint)>();
         public event EventHandler<ChartPointClickedEventArgs>? ChartPointClicked;
 
@@ -77,11 +76,96 @@ namespace TimeLogger.Controls
             set => SetValue(DayAmountProperty, value);
         }
 
+        public Color SweepPen1Color
+        {
+            get => (Color)GetValue(SweepPen1ColorProperty);
+            set => SetValue(SweepPen1ColorProperty, value);
+        }
+        public static readonly DependencyProperty SweepPen1ColorProperty = DependencyProperty.Register(
+            nameof(SweepPen1Color),
+            typeof(Color),
+            typeof(SweepChart),
+            new PropertyMetadata(Color.FromArgb(110, 0, 108, 255)));
+
+        public Color SweepPen2Color
+        {
+            get => (Color)GetValue(SweepPen2ColorProperty);
+            set => SetValue(SweepPen2ColorProperty, value);
+        }
+        public static readonly DependencyProperty SweepPen2ColorProperty = DependencyProperty.Register(
+            nameof(SweepPen2Color),
+            typeof(Color),
+            typeof(SweepChart),
+            new PropertyMetadata(Color.FromArgb(110, 0, 80, 255)));
+
+        public Color TracePenColor
+        {
+            get => (Color)GetValue(TracePenColorProperty);
+            set => SetValue(TracePenColorProperty, value);
+        }
+        public static readonly DependencyProperty TracePenColorProperty = DependencyProperty.Register(
+            nameof(TracePenColor),
+            typeof(Color),
+            typeof(SweepChart),
+            new PropertyMetadata(Color.FromArgb(110, 0, 108, 255)));
+
+        public Color GlowPenColor
+        {
+            get => (Color)GetValue(GlowPenColorProperty);
+            set => SetValue(GlowPenColorProperty, value);
+        }
+        public static readonly DependencyProperty GlowPenColorProperty = DependencyProperty.Register(
+            nameof(GlowPenColor),
+            typeof(Color),
+            typeof(SweepChart),
+            new PropertyMetadata(Color.FromArgb(70, 0, 148, 255)));
+
+        public Color GridPenColor
+        {
+            get => (Color)GetValue(GridPenColorProperty);
+            set => SetValue(GridPenColorProperty, value);
+        }
+        public static readonly DependencyProperty GridPenColorProperty = DependencyProperty.Register(
+            nameof(GridPenColor),
+            typeof(Color),
+            typeof(SweepChart),
+            new PropertyMetadata(Color.FromArgb(70, 35, 35, 35)));
+
+        public Color BackgroundColor
+        {
+            get => (Color)GetValue(BackgroundColorProperty);
+            set => SetValue(BackgroundColorProperty, value);
+        }
+        public static readonly DependencyProperty BackgroundColorProperty = DependencyProperty.Register(
+            nameof(BackgroundColor),
+            typeof(Color),
+            typeof(SweepChart),
+            new PropertyMetadata(Color.FromArgb(150, 0, 0, 0)));
+
+        public static readonly DependencyProperty DrawBackgroundProperty = DependencyProperty.Register(
+            nameof(DrawBackground),
+            typeof(bool),
+            typeof(SweepChart),
+            new PropertyMetadata(false));
+        public bool DrawBackground
+        {
+            get => (bool)GetValue(DrawBackgroundProperty);
+            set => SetValue(DrawBackgroundProperty, value);
+        }
+
         #endregion
 
         void SweepChart_Loaded(object sender, RoutedEventArgs e)
         {
             _lastFrame = DateTime.Now;
+            #region [Build Pen Brushes]
+            sweepPen1 = new Pen(new SolidColorBrush(SweepPen1Color), 2);
+            sweepPen2 = new Pen(new SolidColorBrush(SweepPen2Color), 2);
+            tracePen = new Pen(new SolidColorBrush(TracePenColor), 2);
+            glowPen = new Pen(new SolidColorBrush(GlowPenColor), 6);
+            gridPen = new Pen(new SolidColorBrush(GridPenColor), 1);
+            bkgndBrush = new SolidColorBrush(BackgroundColor);
+            #endregion
             CompositionTarget.Rendering += CompositionTarget_Rendering;
         }
 
@@ -100,8 +184,9 @@ namespace TimeLogger.Controls
 
             _sweepX += SweepPixelsPerSecond * elapsedSeconds;
 
-            if (_sweepX > ActualWidth)
-                _sweepX = 0; // Loop back to start
+            // Loop back to start (with small buffer to prevent hard-cut)
+            if (_sweepX > ActualWidth + (ActualWidth * 0.06))
+                _sweepX = 0;
 
             InvalidateVisual(); // Trigger redraw
         }
@@ -116,7 +201,7 @@ namespace TimeLogger.Controls
             if (width <= 0 || height <= 0)
                 return;
 
-            if (_drawBackground)
+            if (DrawBackground)
                 dc.DrawRectangle(bkgndBrush, null, new Rect(0, 0, width, height));
 
             DrawGrid(dc);
@@ -198,7 +283,7 @@ namespace TimeLogger.Controls
         void DrawSweepLine(DrawingContext dc)
         {
             dc.DrawLine(sweepPen1, new Point(_sweepX, 0), new Point(_sweepX, ActualHeight));
-            dc.DrawLine(sweepPen2, new Point(_sweepX-1, 0), new Point(_sweepX-1, ActualHeight));
+            dc.DrawLine(sweepPen2, new Point(_sweepX-2, 0), new Point(_sweepX-2, ActualHeight));
         }
 
         Point ConvertToScreenPoint(ChartPoint point, DateTime weekStart, double minValue, double maxValue)
