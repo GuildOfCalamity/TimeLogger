@@ -481,6 +481,7 @@
             DayAmount="14.0"
             GlowPenColor="#501E90FF"
             GridPenColor="#00404040"
+            PointClickedCommand="{Binding ChartPointSelectedCommand}"
             SweepPen1Color="#60F0F0F0"
             SweepPen2Color="#801E90FF"
             SweepPixelsPerSecond="{Binding SweepSpeed, Mode=OneWay}"

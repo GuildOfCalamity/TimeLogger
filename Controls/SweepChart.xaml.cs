@@ -13,6 +13,7 @@ namespace TimeLogger.Controls
 {
     public partial class SweepChart : UserControl
     {
+        #region [Properties]
         double _sweepX;
         bool _drawLabels = false;
         DateTime _lastFrame;
@@ -27,6 +28,7 @@ namespace TimeLogger.Controls
 
         ChartPoint _hoveredPoint;
         Point _hoveredScreenPoint;
+        #endregion
 
         public SweepChart()
         {
@@ -148,7 +150,6 @@ namespace TimeLogger.Controls
             }
         }
 
-
         void DrawText(DrawingContext dc, string text, double x, double y)
         {
             FormattedText formattedText =
@@ -166,7 +167,6 @@ namespace TimeLogger.Controls
                 new Point(x, y));
         }
 
-
         void DrawHoveredPoint(DrawingContext dc)
         {
             if (_hoveredPoint == null)
@@ -181,9 +181,25 @@ namespace TimeLogger.Controls
         }
 
 
+        #region [Dependency Properties]
+        public static readonly DependencyProperty PointClickedCommandProperty = 
+            DependencyProperty.Register(
+                nameof(PointClickedCommand),
+                typeof(ICommand),
+                typeof(SweepChart),
+                new PropertyMetadata(null));
 
+        public ICommand PointClickedCommand
+        {
+            get => (ICommand)GetValue(PointClickedCommandProperty);
+            set => SetValue(PointClickedCommandProperty, value);
+        }
 
-        #region Dependency Properties
+        void OnGraphPointClicked(ChartPoint point)
+        {
+            if (PointClickedCommand?.CanExecute(point) == true)
+                PointClickedCommand?.Execute(point);
+        }
 
         public static readonly DependencyProperty ItemsSourceProperty =
             DependencyProperty.Register(
@@ -489,7 +505,10 @@ namespace TimeLogger.Controls
 
                 if ((dx * dx) + (dy * dy) <= hitRadius * hitRadius)
                 {
+                    // Fire event for any code-behind handlers
                     ChartPointClicked?.Invoke(this, new ChartPointClickedEventArgs(item.DataPoint));
+                    // Fire event for any bound ICommand handlers
+                    OnGraphPointClicked(item.DataPoint);
                     break;
                 }
             }

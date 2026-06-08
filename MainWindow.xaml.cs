@@ -43,13 +43,14 @@ public partial class MainWindow : Window
         //    vm?.SetPointSelection(cp);
         //};
 
-        sweep.ChartPointClicked += (_, args) =>
-        {
-            var cp = args.Point;
-            if (DataContext is not MainViewModel vm)
-                return;
-            vm?.SetPointSelection(cp);
-        };
+        // Converted this to DependencyProperty and bind to it from XAML to avoid code-behind.
+        //sweep.ChartPointClicked += (_, args) =>
+        //{
+        //    var cp = args.Point;
+        //    if (DataContext is not MainViewModel vm)
+        //        return;
+        //    vm?.SetPointSelection(cp);
+        //};
     }
 
     void TimeWindow_Loaded(object sender, RoutedEventArgs e)
