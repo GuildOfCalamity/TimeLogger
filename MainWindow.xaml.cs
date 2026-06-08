@@ -20,7 +20,7 @@ public partial class MainWindow : Window
         //        return;
         //    vm.ShowChart(chart, listing);
         //};
-        
+
         DataContext = new MainViewModel(new DialogService(this));
 
         #region [Example of fetching window from separate module]
@@ -42,6 +42,14 @@ public partial class MainWindow : Window
         //         return;
         //    vm?.SetPointSelection(cp);
         //};
+
+        sweep.ChartPointClicked += (_, args) =>
+        {
+            var cp = args.Point;
+            if (DataContext is not MainViewModel vm)
+                return;
+            vm?.SetPointSelection(cp);
+        };
     }
 
     void TimeWindow_Loaded(object sender, RoutedEventArgs e)
