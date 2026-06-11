@@ -41,7 +41,7 @@ namespace TimeLogger.Controls
             MouseMove += HeartbeatChart_MouseMove;
             MouseLeave += HeartbeatChart_MouseLeave;
 
-            this.ToolTip = new ToolTip();
+            //this.ToolTip = new ToolTip();
         }
 
         void HeartbeatChart_MouseMove(object sender, MouseEventArgs e)
@@ -58,23 +58,38 @@ namespace TimeLogger.Controls
                 {
                     _hoveredPoint = item.DataPoint;
                     _hoveredScreenPoint = item.ScreenPoint;
-                    this.ToolTip = new ToolTip
-                    {
-                        Content = $"{item.DataPoint.Title}\n{item.DataPoint.Time:G}\n{item.DataPoint.Value:N2} {item.DataPoint.Uom}", 
-                    };
-                    ToolTipService.SetIsEnabled(this, true);
+                    //this.ToolTip = new ToolTip
+                    //{
+                    //    Content = $"{item.DataPoint.Title}\n{item.DataPoint.Time:G}\n{item.DataPoint.Value:N2} {item.DataPoint.Uom}", 
+                    //};
+                    //ToolTipService.SetIsEnabled(this, true);
+
+                    PART_Tooltip.Width = 190;
+                    PART_Tooltip.Height = 70;
+                    if (mouse.X + (PART_Tooltip.Width / 2) > ActualWidth)
+                        PART_Tooltip.Margin = new Thickness(ActualWidth - PART_Tooltip.Width, 0, 0, 0);
+                    else if (mouse.X - (PART_Tooltip.Width / 2) < 0)
+                        PART_Tooltip.Margin = new Thickness(0, 0, 0, 0);
+                    else
+                        PART_Tooltip.Margin = new Thickness(mouse.X - (PART_Tooltip.Width / 2), 0, 0, 0);
+                    PART_TooltipText.Text = $"{item.DataPoint.Title}\n{item.DataPoint.Time:ddd MMM dd yyyy}\n{item.DataPoint.Value:N2} {item.DataPoint.Uom}";
+                    if (PART_Tooltip.Visibility != Visibility.Visible)
+                        PART_Tooltip.Visibility = Visibility.Visible;
+
                     InvalidateVisual();
                     return;
                 }
             }
-            this.ToolTip = null;
+            //this.ToolTip = null;
             InvalidateVisual();
         }
 
         void HeartbeatChart_MouseLeave(object sender, MouseEventArgs e)
         {
             _hoveredPoint = null;
-            this.ToolTip = null;
+            //this.ToolTip = null;
+            if (PART_Tooltip.Visibility == Visibility.Visible)
+                PART_Tooltip.Visibility = Visibility.Hidden;
             InvalidateVisual();
         }
 
@@ -319,11 +334,30 @@ namespace TimeLogger.Controls
             set => SetValue(DrawBackgroundProperty, value);
         }
 
+        public static readonly DependencyProperty TooltipOpacityProperty = DependencyProperty.Register(
+            nameof(TooltipOpacity),
+            typeof(double),
+            typeof(SweepChart),
+            new PropertyMetadata(0.75));
+        /// <summary>
+        /// Is also based on pen colors, so it won't be exact since the user can add/remove opacity in pen 
+        /// colors, but this can be used to make the tooltip more or less visible based on user preference.
+        /// </summary>
+        public double TooltipOpacity
+        {
+            get => (double)GetValue(TooltipOpacityProperty);
+            set => SetValue(TooltipOpacityProperty, value);
+        }
         #endregion
 
         void SweepChart_Loaded(object sender, RoutedEventArgs e)
         {
             _lastFrame = DateTime.Now;
+            PART_Tooltip.Opacity = TooltipOpacity;
+            PART_Tooltip.HorizontalAlignment = HorizontalAlignment.Left;
+            PART_Tooltip.VerticalAlignment = VerticalAlignment.Center;
+            PART_Tooltip.BorderBrush = new SolidColorBrush(GlowPenColor);
+            PART_TooltipText.Foreground = new SolidColorBrush(TracePenColor);
             #region [Build Pen Brushes]
             sweepPen1 = new Pen(new SolidColorBrush(SweepPen1Color), 2);
             sweepPen2 = new Pen(new SolidColorBrush(SweepPen2Color), 2);
@@ -333,6 +367,7 @@ namespace TimeLogger.Controls
             bkgndBrush = new SolidColorBrush(BackgroundColor);
             #endregion
             CompositionTarget.Rendering += CompositionTarget_Rendering;
+
         }
 
         void SweepChart_Unloaded(object sender, RoutedEventArgs e)
@@ -351,10 +386,14 @@ namespace TimeLogger.Controls
             _sweepX += SweepPixelsPerSecond * elapsedSeconds;
 
             // Loop back to start (with small buffer to prevent hard-cut)
-            if (_sweepX > ActualWidth + (ActualWidth * 0.06))
+            if (_sweepX > ActualWidth + (ActualWidth * 0.08))
                 _sweepX = 0;
 
             InvalidateVisual(); // Trigger redraw
+
+            // Ensure tooltip is on top (z-order fix)
+            PART_Grid.Children.Remove(PART_Tooltip);
+            PART_Grid.Children.Add(PART_Tooltip);
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -458,6 +497,26 @@ namespace TimeLogger.Controls
             dc.DrawLine(sweepPen2, new Point(_sweepX-2, 0), new Point(_sweepX-2, ActualHeight));
         }
 
+        void SweepChart_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Point mouse = e.GetPosition(this);
+            const double hitRadius = 8;
+            foreach (var item in _screenPoints)
+            {
+                double dx = item.ScreenPoint.X - mouse.X;
+                double dy = item.ScreenPoint.Y - mouse.Y;
+
+                if ((dx * dx) + (dy * dy) <= hitRadius * hitRadius)
+                {
+                    // Fire event for any code-behind handlers
+                    ChartPointClicked?.Invoke(this, new ChartPointClickedEventArgs(item.DataPoint));
+                    // Fire event for any bound ICommand handlers
+                    OnGraphPointClicked(item.DataPoint);
+                    break;
+                }
+            }
+        }
+
         Point ConvertToScreenPoint(ChartPoint point, DateTime weekStart, double minValue, double maxValue)
         {
             double totalSeconds = TimeSpan.FromDays(DayAmount).TotalSeconds;
@@ -492,26 +551,6 @@ namespace TimeLogger.Controls
         {
             int diff = (int)days;
             return DateTime.Now.AddDays(-diff);
-        }
-
-        void SweepChart_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Point mouse = e.GetPosition(this);
-            const double hitRadius = 8;
-            foreach (var item in _screenPoints)
-            {
-                double dx = item.ScreenPoint.X - mouse.X;
-                double dy = item.ScreenPoint.Y - mouse.Y;
-
-                if ((dx * dx) + (dy * dy) <= hitRadius * hitRadius)
-                {
-                    // Fire event for any code-behind handlers
-                    ChartPointClicked?.Invoke(this, new ChartPointClickedEventArgs(item.DataPoint));
-                    // Fire event for any bound ICommand handlers
-                    OnGraphPointClicked(item.DataPoint);
-                    break;
-                }
-            }
         }
     }
 }

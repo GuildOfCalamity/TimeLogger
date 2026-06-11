@@ -485,6 +485,7 @@
             SweepPen1Color="#60F0F0F0"
             SweepPen2Color="#801E90FF"
             SweepPixelsPerSecond="{Binding SweepSpeed, Mode=OneWay}"
+            TooltipOpacity="1.0"
             TracePenColor="#60F0F0F0"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}, ConverterParameter=reverse}" />
     </Grid>

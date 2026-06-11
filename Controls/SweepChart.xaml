@@ -9,5 +9,30 @@
     d:DesignWidth="400"
     Background="Transparent"
     mc:Ignorable="d">
-    <Grid Background="{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+    <Grid x:Name="PART_Grid" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}">
+        <!--  Tooltip  -->
+        <Border
+            x:Name="PART_Tooltip"
+            Padding="10,4"
+            Background="#88000000"
+            BorderBrush="#881E90FF"
+            BorderThickness="1"
+            CornerRadius="4"
+            Visibility="Collapsed">
+            <TextBlock
+                x:Name="PART_TooltipText"
+                Background="Transparent"
+                FontSize="14"
+                Foreground="White"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="6"
+                    Opacity="0.7"
+                    ShadowDepth="8"
+                    Color="Black" />
+            </Border.Effect>
+        </Border>
+    </Grid>
 </UserControl>
