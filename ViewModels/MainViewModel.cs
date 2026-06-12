@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -13,6 +14,7 @@ namespace TimeLogger.ViewModels;
 public class MainViewModel : INotifyPropertyChanged
 {
     #region [Properties]
+    static bool _loaded = false;
     public event PropertyChangedEventHandler? PropertyChanged;
     void Notify([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     public ObservableCollection<TaskEntry> Entries { get; } = new();
@@ -110,6 +112,9 @@ public class MainViewModel : INotifyPropertyChanged
     public MainViewModel(IDialogService dialogService)
     {
         _dialogService = dialogService;
+        _dialogService!.Instance!.Loaded += MainWindow_Loaded;
+        
+        #region [ICommands]
         AddEntryCommand = new RelayCommand(AddEntry);
         ChartCommand = new RelayCommand(ToggleChart);
         //EditEntryCommand = new RelayCommand(EditSelectedEntry);
@@ -117,13 +122,14 @@ public class MainViewModel : INotifyPropertyChanged
         DoubleClickCommand = new RelayCommand(EditSelectedEntry);
         DeleteEntryCommand = new RelayCommand<TaskEntry>(DeleteEntry);
         ChartPointSelectedCommand = new RelayCommand<ChartPoint>(OnChartPointSelected);
+        #endregion
 
         ConfigManager.OnError += (s, e) =>
         {
             _dialogService?.ShowWarning($"ConfigManager error:{Environment.NewLine}{e.Message}");
         };
 
-        // Load app configs
+        #region [Load app configs]
         DefaultUrl = ConfigManager.Get("DefaultUrl", defaultValue: string.Empty);
         UseBusinessWeek = ConfigManager.Get("UseBusinessWeek", defaultValue: true);
         SweepSpeed = ConfigManager.Get("SweepSpeed", defaultValue: 100.0);
@@ -136,22 +142,44 @@ public class MainViewModel : INotifyPropertyChanged
             ConfigManager.Set("SweepSpeed", 100.0, saveAfterUpdate: true);
             ConfigManager.Set("FadeSeconds", 5.0, saveAfterUpdate: true);
         }
+        #endregion
 
         // Load persisted data
         _ = LoadAsyncDescending();
 
-        _dialogService!.Instance!.Loaded += MainViewModel_Loaded;
-
         // Save whenever entries change
         Entries.CollectionChanged += async (_, __) =>
         {
-            await DataStore.SaveAsync(Entries);
+            if (_loaded)
+                await DataStore.SaveAsync(Entries);
             Notify(nameof(TodayTotalDisplay));
             Notify(nameof(WeekTotalDisplay));
         };
     }
 
-    void MainViewModel_Loaded(object sender, RoutedEventArgs e) => SetupSweepChart(_dialogService!.Instance!.sweep);
+    void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        Task.Run(async () =>
+        {
+            // Wait a moment to ensure the window is fully loaded
+            await Task.Delay(250);
+            try
+            {
+                _dialogService!.Instance!.Dispatcher.Invoke(() =>
+                {
+                    SetupSweepChart(_dialogService.Instance.sweep);
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERROR] While setting up sweep chart: {ex.Message}");
+            }
+            finally
+            {
+                _loaded = true;
+            }
+        });
+    }
 
     #endregion
 
