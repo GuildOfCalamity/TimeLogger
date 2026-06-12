@@ -479,6 +479,7 @@
             Grid.Row="1"
             Margin="8,2"
             DayAmount="14.0"
+            FadeSeconds="{Binding FadeSeconds, Mode=OneWay}"
             GlowPenColor="#501E90FF"
             GridPenColor="#00404040"
             PointClickedCommand="{Binding ChartPointSelectedCommand}"

@@ -17,6 +17,7 @@ public class MainViewModel : INotifyPropertyChanged
     void Notify([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     public ObservableCollection<TaskEntry> Entries { get; } = new();
     public double SweepSpeed { get; set; }
+    public double FadeSeconds { get; set; }
     public bool UseBusinessWeek { get; set; }
     public string? DescriptionInput { get; set; }
     public string? UrlInput { get; set; }
@@ -126,12 +127,14 @@ public class MainViewModel : INotifyPropertyChanged
         DefaultUrl = ConfigManager.Get("DefaultUrl", defaultValue: string.Empty);
         UseBusinessWeek = ConfigManager.Get("UseBusinessWeek", defaultValue: true);
         SweepSpeed = ConfigManager.Get("SweepSpeed", defaultValue: 100.0);
+        FadeSeconds = ConfigManager.Get("FadeSeconds", defaultValue: 5.0);
         if (string.IsNullOrEmpty(DefaultUrl))
         {
             ConfigManager.Set(nameof(UseBusinessWeek), true, saveAfterUpdate: true);
             DefaultUrl = "https://azuredevops.com";
             ConfigManager.Set("DefaultUrl", "https://azuredevops.com", saveAfterUpdate: true);
             ConfigManager.Set("SweepSpeed", 100.0, saveAfterUpdate: true);
+            ConfigManager.Set("FadeSeconds", 5.0, saveAfterUpdate: true);
         }
 
         // Load persisted data
