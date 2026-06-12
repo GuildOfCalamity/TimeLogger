@@ -16,8 +16,22 @@ public static class DataStore
         if (!Directory.Exists(Folder))
             Directory.CreateDirectory(Folder);
 
-        using FileStream fs = File.Create(FilePath);
-        await JsonSerializer.SerializeAsync(fs, entries, Options);
+        try
+        {
+            using FileStream fs = File.Create(FilePath);
+            await JsonSerializer.SerializeAsync(fs, entries, Options);
+        }
+        catch (IOException ex) 
+        {
+            Debug.WriteLine($"[WARNING] Failed to save data to {FilePath}: {ex.Message}");
+            await Task.Delay(100);
+            try
+            {
+                using FileStream fs = File.Create(FilePath);
+                await JsonSerializer.SerializeAsync(fs, entries, Options);
+            }
+            catch { }
+        }
     }
 
     public static async Task<List<TaskEntry>> LoadAsync()
@@ -27,8 +41,27 @@ public static class DataStore
 
         Debug.WriteLine($"[INFO] Loading data from {FilePath}");
 
-        using FileStream fs = File.OpenRead(FilePath);
-        var result = await JsonSerializer.DeserializeAsync<List<TaskEntry>>(fs, Options);
-        return result ?? new List<TaskEntry>();
+        try
+        {
+            using FileStream fs = File.OpenRead(FilePath);
+            var result = await JsonSerializer.DeserializeAsync<List<TaskEntry>>(fs, Options);
+            return result ?? new List<TaskEntry>();
+        }
+        catch (IOException ex)
+        {
+            Debug.WriteLine($"[WARNING] Failed to load data from {FilePath}: {ex.Message}");
+            await Task.Delay(100);
+            try
+            {
+                using FileStream fs = File.OpenRead(FilePath);
+                var result = await JsonSerializer.DeserializeAsync<List<TaskEntry>>(fs, Options);
+                return result ?? new List<TaskEntry>();
+            }
+            catch 
+            {
+                throw; // total failure, bubble up the exception
+            }
+        }
+
     }
 }

@@ -360,33 +360,34 @@ namespace TimeLogger.Controls
             PART_Tooltip.BorderBrush = new SolidColorBrush(GlowPenColor);
             PART_TooltipText.Foreground = new SolidColorBrush(TracePenColor);
             #region [Build Pen Brushes]
+            var pjoin = PenLineJoin.Round;
             sweepPen1 = new Pen(new SolidColorBrush(SweepPen1Color), 2)
             {
-                LineJoin = PenLineJoin.Round,
+                LineJoin = pjoin,
                 StartLineCap = PenLineCap.Flat,
                 EndLineCap = PenLineCap.Flat
             };
             sweepPen2 = new Pen(new SolidColorBrush(SweepPen2Color), 2)
             {
-                LineJoin = PenLineJoin.Round,
+                LineJoin = pjoin,
                 StartLineCap = PenLineCap.Flat,
                 EndLineCap = PenLineCap.Flat
             };
             tracePen = new Pen(new SolidColorBrush(TracePenColor), 2)
             {
-                LineJoin = PenLineJoin.Round,
+                LineJoin = pjoin,
                 StartLineCap = PenLineCap.Flat,
                 EndLineCap = PenLineCap.Flat
             };
             glowPen = new Pen(new SolidColorBrush(GlowPenColor), 6)
             {
-                LineJoin = PenLineJoin.Round,
+                LineJoin = pjoin,
                 StartLineCap = PenLineCap.Flat,
                 EndLineCap = PenLineCap.Flat
             };
             gridPen = new Pen(new SolidColorBrush(GridPenColor), 1)
             {
-                LineJoin = PenLineJoin.Round,
+                LineJoin = pjoin,
                 StartLineCap = PenLineCap.Flat,
                 EndLineCap = PenLineCap.Flat
             };

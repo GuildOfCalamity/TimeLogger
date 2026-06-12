@@ -140,6 +140,8 @@ public class MainViewModel : INotifyPropertyChanged
         // Load persisted data
         _ = LoadAsyncDescending();
 
+        _dialogService!.Instance!.Loaded += MainViewModel_Loaded;
+
         // Save whenever entries change
         Entries.CollectionChanged += async (_, __) =>
         {
@@ -148,6 +150,9 @@ public class MainViewModel : INotifyPropertyChanged
             Notify(nameof(WeekTotalDisplay));
         };
     }
+
+    void MainViewModel_Loaded(object sender, RoutedEventArgs e) => SetupSweepChart(_dialogService!.Instance!.sweep);
+
     #endregion
 
     #region [Business Logic]
@@ -248,7 +253,7 @@ public class MainViewModel : INotifyPropertyChanged
         Entries.Insert(index, entry);
         #endregion
 
-        #region [Update chart]
+        #region [Update charts]
         TimeSeries = new List<ChartSeries> 
         { 
             new ChartSeries 
@@ -266,6 +271,8 @@ public class MainViewModel : INotifyPropertyChanged
             ChartVisible = false;
             ChartVisible = true;
         }
+
+        SetupSweepChart(_dialogService!.Instance!.sweep);
         #endregion
 
         #region [Clear out previous]
@@ -467,6 +474,9 @@ public class MainViewModel : INotifyPropertyChanged
 
     public void SetupSweepChart(SweepChart sweep)
     {
+        if (sweep == null)
+            return;
+
         var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList();
         sweep.ItemsSource = new ObservableCollection<Models.ChartPoint>();
         foreach (var cp in points)

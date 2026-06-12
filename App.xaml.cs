@@ -71,7 +71,7 @@ namespace TimeLogger
             var ex = e?.Exception;
             if (ex?.Message?.Contains($"{GetCurrentNamespace()}.XmlSerializers") ?? false)
             {
-                // Ignore the fake System.Xml.Serialization warning.
+                // Ignore annoying System.Xml.Serialization warning.
                 Debug.WriteLine($"[INFO] AppDomain is looking for \"{GetCurrentNamespace()}.XmlSerializers\".");
             }
             else
