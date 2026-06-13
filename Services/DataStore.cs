@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+
 using TimeLogger.Models;
 
 namespace TimeLogger.Services;
@@ -18,8 +19,11 @@ public static class DataStore
 
         try
         {
-            using FileStream fs = File.Create(FilePath);
-            await JsonSerializer.SerializeAsync(fs, entries, Options);
+            Debug.WriteLine($"[INFO] Saving data to {FilePath}");
+            using (FileStream fs = File.Create(FilePath))
+            {
+                await JsonSerializer.SerializeAsync(fs, entries, Options);
+            }
         }
         catch (IOException ex) 
         {
@@ -27,8 +31,10 @@ public static class DataStore
             await Task.Delay(100);
             try
             {
-                using FileStream fs = File.Create(FilePath);
-                await JsonSerializer.SerializeAsync(fs, entries, Options);
+                using (FileStream fs = File.Create(FilePath))
+                {
+                    await JsonSerializer.SerializeAsync(fs, entries, Options);
+                }
             }
             catch { }
         }
@@ -40,12 +46,13 @@ public static class DataStore
             return new List<TaskEntry>(); // first run, no data
 
         Debug.WriteLine($"[INFO] Loading data from {FilePath}");
-
         try
         {
-            using FileStream fs = File.OpenRead(FilePath);
-            var result = await JsonSerializer.DeserializeAsync<List<TaskEntry>>(fs, Options);
-            return result ?? new List<TaskEntry>();
+            using (FileStream fs = File.OpenRead(FilePath))
+            {
+                var result = await JsonSerializer.DeserializeAsync<List<TaskEntry>>(fs, Options);
+                return result ?? new List<TaskEntry>();
+            }
         }
         catch (IOException ex)
         {
@@ -53,9 +60,11 @@ public static class DataStore
             await Task.Delay(100);
             try
             {
-                using FileStream fs = File.OpenRead(FilePath);
-                var result = await JsonSerializer.DeserializeAsync<List<TaskEntry>>(fs, Options);
-                return result ?? new List<TaskEntry>();
+                using (FileStream fs = File.OpenRead(FilePath))
+                {
+                    var result = await JsonSerializer.DeserializeAsync<List<TaskEntry>>(fs, Options);
+                    return result ?? new List<TaskEntry>();
+                }
             }
             catch 
             {

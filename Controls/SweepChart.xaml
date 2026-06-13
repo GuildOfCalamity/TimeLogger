@@ -29,8 +29,8 @@
             <Border.Effect>
                 <DropShadowEffect
                     BlurRadius="6"
-                    Opacity="0.7"
-                    ShadowDepth="8"
+                    Opacity="0.8"
+                    ShadowDepth="6"
                     Color="Black" />
             </Border.Effect>
         </Border>

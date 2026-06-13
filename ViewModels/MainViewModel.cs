@@ -157,18 +157,24 @@ public class MainViewModel : INotifyPropertyChanged
         };
     }
 
-    void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// We shouldn't have to do this if we bind the SweepChart properties directly to 
+    /// the ViewModel, but since we're passing the MainWindow reference to the ViewModel 
+    /// for other reasons, we can call this setup method on load to handle the point read.
+    /// </summary>
+    void MainWindow_Loaded(object? sender, RoutedEventArgs e)
     {
+        if (sender is not MainWindow window)
+            return;
+        
         Task.Run(async () =>
         {
-            // Wait a moment to ensure the window is fully loaded
+            // Wait a moment to ensure the window visual tree is
+            // loaded before trying to access the chart control.
             await Task.Delay(250);
             try
             {
-                _dialogService!.Instance!.Dispatcher.Invoke(() =>
-                {
-                    SetupSweepChart(_dialogService.Instance.sweep);
-                });
+                window.sweep.Dispatcher.Invoke(() => { SetupSweepChart(window.sweep); });
             }
             catch (Exception ex)
             {
@@ -395,6 +401,17 @@ public class MainViewModel : INotifyPropertyChanged
         }
 
         Entries.Remove(entry);
+
+        #region [Update charts]
+        TimeSeries = new List<ChartSeries>
+        {
+            new ChartSeries
+            {
+                Points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList()
+            }
+        };
+        SetupSweepChart(_dialogService!.Instance!.sweep);
+        #endregion
 
         Notify(nameof(TodayTotalDisplay));
         Notify(nameof(WeekTotalDisplay));

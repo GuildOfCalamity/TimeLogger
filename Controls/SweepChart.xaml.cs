@@ -29,15 +29,15 @@ namespace TimeLogger.Controls
         ChartPoint _hoveredPoint;
         Point? _lastSweepPoint;
         Point _hoveredScreenPoint;
+        const double _hitRadius = 10;
         #endregion
 
         #region [Dependency Properties]
-        public static readonly DependencyProperty PointClickedCommandProperty =
-            DependencyProperty.Register(
-                nameof(PointClickedCommand),
-                typeof(ICommand),
-                typeof(SweepChart),
-                new PropertyMetadata(null));
+        public static readonly DependencyProperty PointClickedCommandProperty = DependencyProperty.Register(
+            nameof(PointClickedCommand),
+            typeof(ICommand),
+            typeof(SweepChart), 
+            new PropertyMetadata(null));
 
         public ICommand PointClickedCommand
         {
@@ -51,14 +51,11 @@ namespace TimeLogger.Controls
                 PointClickedCommand?.Execute(point);
         }
 
-        public static readonly DependencyProperty ItemsSourceProperty =
-            DependencyProperty.Register(
-                nameof(ItemsSource),
-                typeof(ObservableCollection<ChartPoint>),
-                typeof(SweepChart),
-                new FrameworkPropertyMetadata(
-                    null,
-                    FrameworkPropertyMetadataOptions.AffectsRender));
+        public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(
+            nameof(ItemsSource),
+            typeof(ObservableCollection<ChartPoint>),
+            typeof(SweepChart),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
         public ObservableCollection<ChartPoint> ItemsSource
         {
@@ -66,12 +63,11 @@ namespace TimeLogger.Controls
             set => SetValue(ItemsSourceProperty, value);
         }
 
-        public static readonly DependencyProperty SweepPixelsPerSecondProperty =
-            DependencyProperty.Register(
-                nameof(SweepPixelsPerSecond),
-                typeof(double),
-                typeof(SweepChart),
-                new PropertyMetadata(150.0));
+        public static readonly DependencyProperty SweepPixelsPerSecondProperty = DependencyProperty.Register(
+            nameof(SweepPixelsPerSecond),
+            typeof(double),
+            typeof(SweepChart),
+            new PropertyMetadata(150.0));
 
         public double SweepPixelsPerSecond
         {
@@ -79,24 +75,22 @@ namespace TimeLogger.Controls
             set => SetValue(SweepPixelsPerSecondProperty, value);
         }
 
-        public static readonly DependencyProperty FadeSecondsProperty =
-            DependencyProperty.Register(
-                nameof(FadeSeconds),
-                typeof(double),
-                typeof(SweepChart),
-                new PropertyMetadata(5.0));
+        public static readonly DependencyProperty FadeSecondsProperty = DependencyProperty.Register(
+            nameof(FadeSeconds),
+            typeof(double),
+            typeof(SweepChart),
+            new PropertyMetadata(4.0));
         public double FadeSeconds
         {
             get => (double)GetValue(FadeSecondsProperty);
             set => SetValue(FadeSecondsProperty, value);
         }
 
-        public static readonly DependencyProperty DayAmountProperty =
-            DependencyProperty.Register(
-                nameof(DayAmount),
-                typeof(double),
-                typeof(SweepChart),
-                new PropertyMetadata(7.0));
+        public static readonly DependencyProperty DayAmountProperty = DependencyProperty.Register(
+            nameof(DayAmount),
+            typeof(double),
+            typeof(SweepChart),
+            new PropertyMetadata(7.0));
 
         public double DayAmount
         {
@@ -210,27 +204,39 @@ namespace TimeLogger.Controls
         void HeartbeatChart_MouseMove(object sender, MouseEventArgs e)
         {
             Point mouse = e.GetPosition(this);
-            const double hitRadius = 10;
             _hoveredPoint = null;
             foreach (var item in _screenPoints)
             {
                 double dx = item.ScreenPoint.X - mouse.X;
                 double dy = item.ScreenPoint.Y - mouse.Y;
 
-                if ((dx * dx) + (dy * dy) <= hitRadius * hitRadius)
+                if ((dx * dx) + (dy * dy) <= _hitRadius * _hitRadius)
                 {
                     _hoveredPoint = item.DataPoint;
                     _hoveredScreenPoint = item.ScreenPoint;
 
-                    PART_Tooltip.Width = 190;
-                    PART_Tooltip.Height = 70;
+                    PART_Tooltip.Width = 160; 
+                    PART_Tooltip.Height = 64;
+
+                    #region [Tooltip Position]
                     if (mouse.X + (PART_Tooltip.Width / 2) > ActualWidth)
                         PART_Tooltip.Margin = new Thickness(ActualWidth - PART_Tooltip.Width, 0, 0, 0);
                     else if (mouse.X - (PART_Tooltip.Width / 2) < 0)
                         PART_Tooltip.Margin = new Thickness(0, 0, 0, 0);
                     else
                         PART_Tooltip.Margin = new Thickness(mouse.X - (PART_Tooltip.Width / 2), 0, 0, 0);
+
+                    if (mouse.Y - PART_Tooltip.Height < 0)
+                        PART_Tooltip.VerticalAlignment = VerticalAlignment.Top;
+                    else if (mouse.Y + PART_Tooltip.Height > ActualHeight)
+                        PART_Tooltip.VerticalAlignment = VerticalAlignment.Bottom;
+                    else
+                        PART_Tooltip.VerticalAlignment = VerticalAlignment.Center;
+                    #endregion
+
+                    // Set content based on DataPoint
                     PART_TooltipText.Text = $"{item.DataPoint.Title}\n{item.DataPoint.Time:ddd MMM dd yyyy}\n{item.DataPoint.Value:N2} {item.DataPoint.Uom}";
+                    
                     if (PART_Tooltip.Visibility != Visibility.Visible)
                         PART_Tooltip.Visibility = Visibility.Visible;
 
@@ -343,12 +349,8 @@ namespace TimeLogger.Controls
             if (_hoveredPoint == null)
                 return;
 
-            dc.DrawEllipse(
-                Brushes.DodgerBlue,
-                new Pen(Brushes.White, 1),
-                _hoveredScreenPoint,
-                3,
-                3);
+            // TODO: Replace brushes with DependencyProperty brushes
+            dc.DrawEllipse(Brushes.DodgerBlue, new Pen(Brushes.White, 1), _hoveredScreenPoint, 3, 3);
         }
 
         void SweepChart_Loaded(object sender, RoutedEventArgs e)
@@ -407,8 +409,9 @@ namespace TimeLogger.Controls
             DateTime now = DateTime.UtcNow;
             double elapsed = (now - _lastFrame).TotalSeconds;
             _lastFrame = now;
-            
+
             _sweepX += SweepPixelsPerSecond * elapsed;
+
             if (_sweepX > ActualWidth)
             {
                 _sweepX = 0;
@@ -419,12 +422,14 @@ namespace TimeLogger.Controls
             }
 
             Point currentPoint = GetCurrentSweepPoint();
+
             if (_lastSweepPoint.HasValue)
             {
                 AddTraceSegment(_lastSweepPoint.Value, currentPoint);
             }
 
             _lastSweepPoint = currentPoint;
+
             if (_sweepX > ActualWidth)
             {
                 _sweepX = 0;
@@ -440,6 +445,7 @@ namespace TimeLogger.Controls
             PART_Grid.Children.Add(PART_Tooltip);
         }
 
+        [Obsolete("Old rendering method, replaced by smoother version with fading trace segments")]
         void CompositionTarget_Rendering_Old(object? sender, EventArgs e)
         {
             DateTime now = DateTime.Now;
@@ -541,6 +547,7 @@ namespace TimeLogger.Controls
             }
         }
 
+        [Obsolete("Old rendering method, replaced by smoother version with fading trace segments")]
         void DrawTrace_Old(DrawingContext dc)
         {
             StreamGeometry geometry = new StreamGeometry();
@@ -605,6 +612,9 @@ namespace TimeLogger.Controls
 
         void UpdateTraceDecay(DateTime now)
         {
+            if (_segments.Count == 0)
+                return;
+
             for (int i = _segments.Count - 1; i >= 0; i--)
             {
                 var segment = _segments[i];
@@ -711,6 +721,7 @@ namespace TimeLogger.Controls
         }
     }
 
+    #region [Models]
     sealed class TraceSegment
     {
         public StreamGeometry Geometry { get; set; }
@@ -719,4 +730,5 @@ namespace TimeLogger.Controls
 
         public DateTime Created { get; set; }
     }
+    #endregion
 }
