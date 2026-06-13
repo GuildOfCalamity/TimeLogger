@@ -16,6 +16,7 @@ namespace TimeLogger.Controls
         #region [Properties]
         double _sweepX;
         bool _drawLabels = false;
+        bool _penFade = false;
         DateTime _lastFrame;
         Pen gridPen = new Pen(new SolidColorBrush(Color.FromArgb(130, 35, 35, 35)), 1);
         Pen glowPen = new Pen(new SolidColorBrush(Color.FromArgb(70, 0, 148, 255)), 6);
@@ -188,6 +189,17 @@ namespace TimeLogger.Controls
         {
             get => (double)GetValue(TooltipOpacityProperty);
             set => SetValue(TooltipOpacityProperty, value);
+        }
+
+        public static readonly DependencyProperty PenFadeProperty = DependencyProperty.Register(
+            nameof(PenFade),
+            typeof(bool),
+            typeof(SweepChart),
+            new PropertyMetadata(true));
+        public bool PenFade
+        {
+            get => (bool)GetValue(PenFadeProperty);
+            set => SetValue(PenFadeProperty, value);
         }
         #endregion
 
@@ -539,9 +551,27 @@ namespace TimeLogger.Controls
         {
             foreach (TraceSegment segment in _segments)
             {
-                byte alpha = (byte)(255 * segment.Opacity);
+                if (PenFade)
+                {
+                    byte alpha = (byte)(255 * segment.Opacity);
+                    tracePen = new Pen(new SolidColorBrush(Color.FromArgb(alpha, TracePenColor.R, TracePenColor.G, TracePenColor.B)), 2)
+                    {
+                        LineJoin = PenLineJoin.Bevel,
+                        StartLineCap = PenLineCap.Flat,
+                        EndLineCap = PenLineCap.Flat
+                    };
+                    //alpha = (byte)((double)alpha * 0.5);
+                    glowPen = new Pen(new SolidColorBrush(Color.FromArgb(alpha, GlowPenColor.R, GlowPenColor.G, GlowPenColor.B)), 6)
+                    {
+                        LineJoin = PenLineJoin.Bevel,
+                        StartLineCap = PenLineCap.Flat,
+                        EndLineCap = PenLineCap.Flat
+                    };
+                }
+
                 glowPen.Freeze();
                 tracePen.Freeze();
+
                 dc.DrawGeometry(null, glowPen, segment.Geometry);
                 dc.DrawGeometry(null, tracePen, segment.Geometry);
             }
