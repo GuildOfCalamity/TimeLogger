@@ -162,7 +162,7 @@
                     <TextBlock
                         FontSize="24"
                         Foreground="#4CAF50"
-                        Text="{Binding TodayTotalDisplay}" />
+                        Text="{Binding TodayTotalDisplay, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Separator Height="4" Background="{StaticResource RingsBrush}" />
                     <TextBlock
                         FontSize="18"
@@ -171,7 +171,7 @@
                     <TextBlock
                         FontSize="24"
                         Foreground="#03A9F4"
-                        Text="{Binding WeekTotalDisplay}" />
+                        Text="{Binding WeekTotalDisplay, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <ctrl:RingSpinner
                     Grid.Column="1"
@@ -481,7 +481,7 @@
             DayAmount="14.0"
             FadeSeconds="{Binding FadeSeconds, Mode=OneWay}"
             GlowPenColor="#501E90FF"
-            GridPenColor="#00404040"
+            GridPenColor="#20404040"
             PenFade="True"
             PointClickedCommand="{Binding ChartPointSelectedCommand}"
             SweepPen1Color="#60F0F0F0"

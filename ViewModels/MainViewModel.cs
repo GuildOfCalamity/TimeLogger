@@ -318,6 +318,8 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(DescriptionInput));
         Notify(nameof(UrlInput));
         Notify(nameof(TimeInput));
+        Notify(nameof(TodayTotalDisplay));
+        Notify(nameof(WeekTotalDisplay));
     }
 
     /// <summary>
