@@ -6,8 +6,22 @@ using System.Windows.Interop;
 namespace TimeLogger.Support
 {
     /// <summary>
-    /// Portions taken from https://github.com/Zeliper/z-dark-theme-wpf/blob/master/src/ZDarkTheme.Wpf/DarkTitleBar.cs
+    /// https://learn.microsoft.com/en-us/windows/win32/dwm/blur-ovw
+    /// https://learn.microsoft.com/en-us/windows/win32/dwm/thumbnail-ovw
+    /// https://learn.microsoft.com/en-us/windows/win32/dwm/composition-ovw#controlling-non-client-region-rendering
+    /// Two of the visual effects that DWM enables are transparency of the non-client region of a window, and transition effects.
+    /// Your application might have to disable or re-enable these effects for styling or compatibility reasons.
+    /// The following functions are used to manage transparency and transition effect behavior:
+    ///  - DwmGetWindowAttribute
+    ///  - DwmSetWindowAttribute
     /// </summary>
+    /// <remarks>
+    /// Minimum supported client: Windows Vista [desktop apps only]
+    /// As of Windows 8, DWM composition is always enabled, so this message is not sent regardless 
+    /// of video mode changes. If you are using Windows 7/Vista then you may want to add 
+    /// "override void WndProc(ref Message m)" for DWMCOMPOSITIONCHANGED messages.
+    /// Portions taken from https://github.com/Zeliper/z-dark-theme-wpf/blob/master/src/ZDarkTheme.Wpf/DarkTitleBar.cs
+    /// </remarks>
     public static class DarkTitleBar
     {
         #region [Win32 API]

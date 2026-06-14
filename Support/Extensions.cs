@@ -603,6 +603,50 @@ public static class Extensions
     #endregion
 
     #region [Color Brush Methods]
+    /// <summary>
+    /// Blends two Color values.
+    /// </summary>
+    /// <param name="first">Starting color.</param>
+    /// <param name="second">Ending color.</param>
+    /// <param name="amount">
+    /// Blend amount from 0.0 to 1.0
+    ///   0.0 = first color
+    ///   1.0 = second color
+    ///   0.5 = equal mix
+    /// </param>
+    public static Color Blend(Color first, Color second, double amount = 0.5)
+    {
+        amount = Math.Max(0.0, Math.Min(1.0, amount));
+
+        return Color.FromArgb(
+            (byte)(first.A + ((second.A - first.A) * amount)),
+            (byte)(first.R + ((second.R - first.R) * amount)),
+            (byte)(first.G + ((second.G - first.G) * amount)),
+            (byte)(first.B + ((second.B - first.B) * amount)));
+    }
+
+    /// <summary>
+    /// Blends two SolidColorBrush instances.
+    /// </summary>
+    public static SolidColorBrush Blend(SolidColorBrush first, SolidColorBrush second, double amount = 0.5)
+    {
+        if (first == null)
+            throw new ArgumentNullException(nameof(first));
+
+        if (second == null)
+            throw new ArgumentNullException(nameof(second));
+
+        var brush = new SolidColorBrush(
+            Blend(first.Color, second.Color, amount));
+
+        if (brush.CanFreeze)
+        {
+            brush.Freeze();
+        }
+
+        return brush;
+    }
+
     public static (byte A, byte R, byte G, byte B) ParseHexColor(string hex)
     {
         if (string.IsNullOrWhiteSpace(hex))

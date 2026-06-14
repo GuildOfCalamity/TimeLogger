@@ -15,8 +15,6 @@ namespace TimeLogger.Controls
     {
         #region [Properties]
         double _sweepX;
-        bool _drawLabels = false;
-        bool _penFade = false;
         DateTime _lastFrame;
         Pen gridPen = new Pen(new SolidColorBrush(Color.FromArgb(130, 35, 35, 35)), 1);
         Pen glowPen = new Pen(new SolidColorBrush(Color.FromArgb(70, 0, 148, 255)), 6);
@@ -69,7 +67,6 @@ namespace TimeLogger.Controls
             typeof(double),
             typeof(SweepChart),
             new PropertyMetadata(150.0));
-
         public double SweepPixelsPerSecond
         {
             get => (double)GetValue(SweepPixelsPerSecondProperty);
@@ -92,78 +89,77 @@ namespace TimeLogger.Controls
             typeof(double),
             typeof(SweepChart),
             new PropertyMetadata(7.0));
-
         public double DayAmount
         {
             get => (double)GetValue(DayAmountProperty);
             set => SetValue(DayAmountProperty, value);
         }
 
-        public Color SweepPen1Color
-        {
-            get => (Color)GetValue(SweepPen1ColorProperty);
-            set => SetValue(SweepPen1ColorProperty, value);
-        }
         public static readonly DependencyProperty SweepPen1ColorProperty = DependencyProperty.Register(
             nameof(SweepPen1Color),
             typeof(Color),
             typeof(SweepChart),
             new PropertyMetadata(Color.FromArgb(110, 0, 108, 255)));
-
-        public Color SweepPen2Color
+        public Color SweepPen1Color
         {
-            get => (Color)GetValue(SweepPen2ColorProperty);
-            set => SetValue(SweepPen2ColorProperty, value);
+            get => (Color)GetValue(SweepPen1ColorProperty);
+            set => SetValue(SweepPen1ColorProperty, value);
         }
+
         public static readonly DependencyProperty SweepPen2ColorProperty = DependencyProperty.Register(
             nameof(SweepPen2Color),
             typeof(Color),
             typeof(SweepChart),
             new PropertyMetadata(Color.FromArgb(110, 0, 80, 255)));
-
-        public Color TracePenColor
+        public Color SweepPen2Color
         {
-            get => (Color)GetValue(TracePenColorProperty);
-            set => SetValue(TracePenColorProperty, value);
+            get => (Color)GetValue(SweepPen2ColorProperty);
+            set => SetValue(SweepPen2ColorProperty, value);
         }
+
         public static readonly DependencyProperty TracePenColorProperty = DependencyProperty.Register(
             nameof(TracePenColor),
             typeof(Color),
             typeof(SweepChart),
             new PropertyMetadata(Color.FromArgb(110, 0, 108, 255)));
-
-        public Color GlowPenColor
+        public Color TracePenColor
         {
-            get => (Color)GetValue(GlowPenColorProperty);
-            set => SetValue(GlowPenColorProperty, value);
+            get => (Color)GetValue(TracePenColorProperty);
+            set => SetValue(TracePenColorProperty, value);
         }
+
         public static readonly DependencyProperty GlowPenColorProperty = DependencyProperty.Register(
             nameof(GlowPenColor),
             typeof(Color),
             typeof(SweepChart),
             new PropertyMetadata(Color.FromArgb(70, 0, 148, 255)));
-
-        public Color GridPenColor
+        public Color GlowPenColor
         {
-            get => (Color)GetValue(GridPenColorProperty);
-            set => SetValue(GridPenColorProperty, value);
+            get => (Color)GetValue(GlowPenColorProperty);
+            set => SetValue(GlowPenColorProperty, value);
         }
+
         public static readonly DependencyProperty GridPenColorProperty = DependencyProperty.Register(
             nameof(GridPenColor),
             typeof(Color),
             typeof(SweepChart),
             new PropertyMetadata(Color.FromArgb(70, 35, 35, 35)));
-
-        public Color BackgroundColor
+        public Color GridPenColor
         {
-            get => (Color)GetValue(BackgroundColorProperty);
-            set => SetValue(BackgroundColorProperty, value);
+            get => (Color)GetValue(GridPenColorProperty);
+            set => SetValue(GridPenColorProperty, value);
         }
+
         public static readonly DependencyProperty BackgroundColorProperty = DependencyProperty.Register(
             nameof(BackgroundColor),
             typeof(Color),
             typeof(SweepChart),
             new PropertyMetadata(Color.FromArgb(150, 0, 0, 0)));
+        public Color BackgroundColor
+        {
+            get => (Color)GetValue(BackgroundColorProperty);
+            set => SetValue(BackgroundColorProperty, value);
+        }
 
         public static readonly DependencyProperty DrawBackgroundProperty = DependencyProperty.Register(
             nameof(DrawBackground),
@@ -200,6 +196,39 @@ namespace TimeLogger.Controls
         {
             get => (bool)GetValue(PenFadeProperty);
             set => SetValue(PenFadeProperty, value);
+        }
+
+        public static readonly DependencyProperty DisableSweepProperty = DependencyProperty.Register(
+            nameof(DisableSweep),
+            typeof(bool),
+            typeof(SweepChart),
+            new PropertyMetadata(false));
+        public bool DisableSweep
+        {
+            get => (bool)GetValue(DisableSweepProperty);
+            set => SetValue(DisableSweepProperty, value);
+        }
+
+        public static readonly DependencyProperty DrawLabelsProperty = DependencyProperty.Register(
+            nameof(DrawLabels),
+            typeof(bool),
+            typeof(SweepChart),
+            new PropertyMetadata(false));
+        public bool DrawLabels
+        {
+            get => (bool)GetValue(DrawLabelsProperty);
+            set => SetValue(DrawLabelsProperty, value);
+        }
+
+        public static readonly DependencyProperty PointRadiusProperty = DependencyProperty.Register(
+            nameof(PointRadius),
+            typeof(double),
+            typeof(SweepChart),
+            new PropertyMetadata(5.0));
+        public double PointRadius
+        {
+            get => (double)GetValue(PointRadiusProperty);
+            set => SetValue(PointRadiusProperty, value);
         }
         #endregion
 
@@ -284,7 +313,7 @@ namespace TimeLogger.Controls
                 new Point(leftMargin, ActualHeight - bottomMargin),
                 new Point(ActualWidth, ActualHeight - bottomMargin));
 
-            if (_drawLabels)
+            if (DrawLabels)
             {
                 DrawYAxisLabels(dc, leftMargin);
                 DrawXAxisLabels(dc, bottomMargin);
@@ -492,7 +521,7 @@ namespace TimeLogger.Controls
             if (DrawBackground)
                 dc.DrawRectangle(bkgndBrush, null, new Rect(0, 0, width, height));
 
-            if (_drawLabels)
+            if (DrawLabels)
                 DrawAxes(dc);
 
             DrawGrid(dc);
@@ -528,10 +557,17 @@ namespace TimeLogger.Controls
                 _screenPoints.Add((screenPoint, point));
             }
 
-            DrawTrace(dc);
-            DrawSweepLine(dc);
+            if (DisableSweep)
+            {
+                DrawBezierTrace(dc);
+            }
+            else
+            {
+                DrawTrace(dc);
+                DrawSweepLine(dc);
+            }
 
-            if (_drawLabels)
+            if (DrawLabels)
                 DrawHoveredPoint(dc);
         }
 
@@ -575,6 +611,69 @@ namespace TimeLogger.Controls
                 dc.DrawGeometry(null, glowPen, segment.Geometry);
                 dc.DrawGeometry(null, tracePen, segment.Geometry);
             }
+
+            #region Point Ellipse
+            if (PointRadius <= 0) return;
+            Brush fill1 = new SolidColorBrush(TracePenColor);
+            Brush fill2 = new SolidColorBrush(GlowPenColor);
+            for (int i = 1; i < _screenPoints.Count - 1; i++)
+            {
+                //Brush fill = new SolidColorBrush(Extensions.Blend(
+                //    Color.FromArgb(ToByte(PointOpacity), TracePenColor.R, TracePenColor.G, TracePenColor.B),
+                //    Color.FromArgb(ToByte(PointOpacity), GlowPenColor.R, GlowPenColor.G, GlowPenColor.B),
+                //    0.5));
+                dc.DrawEllipse(fill2, null, _screenPoints[i].ScreenPoint, PointRadius * 1.5, PointRadius * 1.5);
+                dc.DrawEllipse(fill1, null, _screenPoints[i].ScreenPoint, PointRadius, PointRadius);
+            }
+            #endregion
+        }
+
+        /// <summary>
+        /// Converts a normalized double value (0.0 - 1.0) to a byte (0 - 255).
+        /// Values outside the range are clamped.
+        /// </summary>
+        public static byte ToByte(double value)
+        {
+            value = Math.Max(0.0, Math.Min(1.0, value));
+            return (byte)Math.Round(value * 255.0);
+        }
+
+        void DrawBezierTrace(DrawingContext dc)
+        {
+            StreamGeometry geometry = new StreamGeometry();
+            using (StreamGeometryContext ctx = geometry.Open())
+            {
+                ctx.BeginFigure(_screenPoints[0].ScreenPoint, false, false);
+
+                for (int i = 1; i < _screenPoints.Count - 1; i++)
+                {
+                    Point p0 = _screenPoints[i - 1].ScreenPoint;
+                    Point p1 = _screenPoints[i].ScreenPoint;
+                    Point p2 = _screenPoints[i + 1].ScreenPoint;
+
+                    #region [Bezier Control Points]
+                    // How aggressively the curve bends as it approaches and leaves each data point.
+                    // INCREASE: The curve stays straighter longer, then bends harder near p1.
+                    // DECREASE: The curve begins bending almost immediately.
+                    // 0.5 & 0.25 => leave p0 gently approach p1 more tightly.
+                    // Lower values will make for straighter junction bending.
+                    // General rule: c1 should be twice the value of c2.
+                    Point c1 = new Point(p0.X + (p1.X - p0.X) * 0.4, p0.Y);
+                    Point c2 = new Point(p1.X - (p2.X - p0.X) * 0.2, p1.Y);
+                    #endregion
+
+                    ctx.BezierTo(c1, c2, p1, true, false);
+
+                    // Add node points on junctions.
+                    bool isHovered = _hoveredPoint == _screenPoints[i].DataPoint;
+                    double radius = isHovered ? 6 : 4;
+                    Brush fill = isHovered ? new SolidColorBrush(GlowPenColor) : new SolidColorBrush(TracePenColor);
+                    dc.DrawEllipse(fill, null, p1, radius, radius);
+                }
+            }
+            geometry.Freeze();
+            dc.DrawGeometry(null, glowPen, geometry);
+            dc.DrawGeometry(null, tracePen, geometry);
         }
 
         [Obsolete("Old rendering method, replaced by smoother version with fading trace segments")]
@@ -746,7 +845,9 @@ namespace TimeLogger.Controls
             {
                 Geometry = geometry,
                 Opacity = 1.0,
-                Created = DateTime.UtcNow
+                Created = DateTime.UtcNow,
+                Start = start,
+                End = end
             });
         }
     }
@@ -755,10 +856,10 @@ namespace TimeLogger.Controls
     sealed class TraceSegment
     {
         public StreamGeometry Geometry { get; set; }
-
         public double Opacity { get; set; }
-
         public DateTime Created { get; set; }
+        public Point Start { get; set; }
+        public Point End { get; set; }
     }
     #endregion
 }
