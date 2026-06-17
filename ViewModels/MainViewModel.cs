@@ -166,7 +166,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (sender is not MainWindow window)
             return;
-        
+
         Task.Run(async () =>
         {
             // Wait a moment to ensure the window visual tree is
@@ -174,6 +174,7 @@ public class MainViewModel : INotifyPropertyChanged
             await Task.Delay(250);
             try
             {
+                //window.barchart.Dispatcher.Invoke(() => { window.barchart.Entries = Entries.ToList(); });
                 window.sweep.Dispatcher.Invoke(() => { SetupSweepChart(window.sweep); });
             }
             catch (Exception ex)
@@ -185,6 +186,8 @@ public class MainViewModel : INotifyPropertyChanged
                 _loaded = true;
             }
         });
+        window.barchart.Visibility = Visibility.Collapsed;
+        window.sweep.Visibility = Visibility.Visible;
     }
 
     #endregion
@@ -515,8 +518,8 @@ public class MainViewModel : INotifyPropertyChanged
             }
             var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList();
             TimeSeries = new List<ChartSeries> { new ChartSeries { Points = points } };
-            ChartVisible = !ChartVisible;
         }
+        ChartVisible = !ChartVisible;
     }
 
     public void SetupSweepChart(SweepChart sweep)

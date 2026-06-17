@@ -185,7 +185,7 @@
             </Grid>
         </Border>
 
-        <!--  LIST ENTRIES  -->
+        <!--  LISTBOX ENTRIES  -->
         <Border
             x:Name="listing"
             Grid.Row="2"
@@ -466,6 +466,7 @@
             </ListBox>
         </Border>
 
+        <!--  CHARTS  -->
         <ctrl:CartesianChart
             x:Name="chart"
             Grid.Row="2"
@@ -493,6 +494,13 @@
             TooltipOpacity="1.0"
             TracePenColor="#60F0F0F0"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}, ConverterParameter=reverse}" />
+
+        <ctrl:BarChart
+            x:Name="barchart"
+            Grid.Row="1"
+            Entries="{Binding Entries, Mode=OneWay}"
+            Visibility="Collapsed" />
+
     </Grid>
 
 </Window>
