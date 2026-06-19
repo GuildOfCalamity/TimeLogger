@@ -498,8 +498,11 @@
         <ctrl:BarChart
             x:Name="barchart"
             Grid.Row="1"
+            AnimateBars="True"
+            BarBorderColor="#15F0F0F0"
+            BarFillColor="#151E90FF"
             Entries="{Binding Entries, Mode=OneWay}"
-            Visibility="Collapsed" />
+            TextColor="#20F0F0F0" />
 
     </Grid>
 

@@ -14,6 +14,7 @@ namespace TimeLogger.ViewModels;
 public class MainViewModel : INotifyPropertyChanged
 {
     #region [Properties]
+    static bool _useBars = true;
     static bool _loaded = false;
     public event PropertyChangedEventHandler? PropertyChanged;
     void Notify([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
@@ -174,20 +175,34 @@ public class MainViewModel : INotifyPropertyChanged
             await Task.Delay(250);
             try
             {
-                //window.barchart.Dispatcher.Invoke(() => { window.barchart.Entries = Entries.ToList(); });
-                window.sweep.Dispatcher.Invoke(() => { SetupSweepChart(window.sweep); });
+                if (_useBars)
+                {
+                    window.barchart.Dispatcher.Invoke(() => 
+                    { 
+                        SetupBarChart(window.barchart); 
+                        window.barchart.Visibility = Visibility.Visible;
+                        window.sweep.Visibility = Visibility.Collapsed;
+                    });
+                }
+                else
+                {
+                    window.sweep.Dispatcher.Invoke(() => 
+                    { 
+                        SetupSweepChart(window.sweep); 
+                        window.sweep.Visibility = Visibility.Visible;
+                        window.barchart.Visibility = Visibility.Collapsed;
+                    });
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ERROR] While setting up sweep chart: {ex.Message}");
+                Debug.WriteLine($"[ERROR] While setting up chart: {ex.Message}");
             }
             finally
             {
                 _loaded = true;
             }
         });
-        window.barchart.Visibility = Visibility.Collapsed;
-        window.sweep.Visibility = Visibility.Visible;
     }
 
     #endregion
@@ -309,7 +324,10 @@ public class MainViewModel : INotifyPropertyChanged
             ChartVisible = true;
         }
 
-        SetupSweepChart(_dialogService!.Instance!.sweep);
+        if (_useBars)
+            SetupBarChart(_dialogService!.Instance!.barchart);
+        else
+            SetupSweepChart(_dialogService!.Instance!.sweep);
         #endregion
 
         #region [Clear out previous]
@@ -415,7 +433,11 @@ public class MainViewModel : INotifyPropertyChanged
                 Points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList()
             }
         };
-        SetupSweepChart(_dialogService!.Instance!.sweep);
+        
+        if (_useBars)
+            SetupBarChart(_dialogService!.Instance!.barchart);
+        else
+            SetupSweepChart(_dialogService!.Instance!.sweep);
         #endregion
 
         Notify(nameof(TodayTotalDisplay));
@@ -533,6 +555,14 @@ public class MainViewModel : INotifyPropertyChanged
         {
             sweep.ItemsSource.Add(cp);
         }
+    }
+
+    public void SetupBarChart(BarChart barchart)
+    {
+        if (barchart == null)
+            return;
+
+        barchart.Entries = Entries.OrderBy(e => e.Date).ToList();
     }
     #endregion
 }
