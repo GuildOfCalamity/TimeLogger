@@ -240,6 +240,17 @@ namespace TimeLogger.Controls
             MouseLeftButtonDown += SweepChart_MouseLeftButtonDown;
             MouseMove += HeartbeatChart_MouseMove;
             MouseLeave += HeartbeatChart_MouseLeave;
+            IsVisibleChanged += (o, a) =>
+            {
+                if (a.NewValue is bool visible1 && visible1 == true)
+                {
+                    CompositionTarget.Rendering += CompositionTarget_Rendering;
+                }
+                else if (a.NewValue is bool visible2 && visible2 == false)
+                {
+                    CompositionTarget.Rendering -= CompositionTarget_Rendering;
+                }
+            };
         }
 
         void HeartbeatChart_MouseMove(object sender, MouseEventArgs e)
@@ -436,12 +447,15 @@ namespace TimeLogger.Controls
             };
             bkgndBrush = new SolidColorBrush(BackgroundColor);
             #endregion
-            CompositionTarget.Rendering += CompositionTarget_Rendering;
 
+            // We're handling this in the IsVisibleChanged event now.
+            //CompositionTarget.Rendering += CompositionTarget_Rendering;
         }
 
         void SweepChart_Unloaded(object sender, RoutedEventArgs e)
         {
+            // We're handling this in the IsVisibleChanged event
+            // now,s but it doesn't hurt to unsubcribe JIC.
             CompositionTarget.Rendering -= CompositionTarget_Rendering;
         }
 

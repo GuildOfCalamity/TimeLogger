@@ -14,7 +14,6 @@ namespace TimeLogger.ViewModels;
 public class MainViewModel : INotifyPropertyChanged
 {
     #region [Properties]
-    static bool _useBars = true;
     static bool _loaded = false;
     public event PropertyChangedEventHandler? PropertyChanged;
     void Notify([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
@@ -22,6 +21,7 @@ public class MainViewModel : INotifyPropertyChanged
     public double SweepSpeed { get; set; }
     public double FadeSeconds { get; set; }
     public bool UseBusinessWeek { get; set; }
+    public bool BarChartPreferred { get; set; }
     public string? DescriptionInput { get; set; }
     public string? UrlInput { get; set; }
     public string? TimeInput { get; set; }
@@ -133,11 +133,13 @@ public class MainViewModel : INotifyPropertyChanged
         #region [Load app configs]
         DefaultUrl = ConfigManager.Get("DefaultUrl", defaultValue: string.Empty);
         UseBusinessWeek = ConfigManager.Get("UseBusinessWeek", defaultValue: true);
+        BarChartPreferred = ConfigManager.Get("BarChartPreferred", defaultValue: true);
         SweepSpeed = ConfigManager.Get("SweepSpeed", defaultValue: 100.0);
         FadeSeconds = ConfigManager.Get("FadeSeconds", defaultValue: 5.0);
         if (string.IsNullOrEmpty(DefaultUrl))
         {
             ConfigManager.Set(nameof(UseBusinessWeek), true, saveAfterUpdate: true);
+            ConfigManager.Set(nameof(BarChartPreferred), true, saveAfterUpdate: true);
             DefaultUrl = "https://azuredevops.com";
             ConfigManager.Set("DefaultUrl", "https://azuredevops.com", saveAfterUpdate: true);
             ConfigManager.Set("SweepSpeed", 100.0, saveAfterUpdate: true);
@@ -175,7 +177,7 @@ public class MainViewModel : INotifyPropertyChanged
             await Task.Delay(250);
             try
             {
-                if (_useBars)
+                if (BarChartPreferred)
                 {
                     window.barchart.Dispatcher.Invoke(() => 
                     { 
@@ -324,7 +326,7 @@ public class MainViewModel : INotifyPropertyChanged
             ChartVisible = true;
         }
 
-        if (_useBars)
+        if (BarChartPreferred)
             SetupBarChart(_dialogService!.Instance!.barchart);
         else
             SetupSweepChart(_dialogService!.Instance!.sweep);
@@ -434,7 +436,7 @@ public class MainViewModel : INotifyPropertyChanged
             }
         };
         
-        if (_useBars)
+        if (BarChartPreferred)
             SetupBarChart(_dialogService!.Instance!.barchart);
         else
             SetupSweepChart(_dialogService!.Instance!.sweep);
