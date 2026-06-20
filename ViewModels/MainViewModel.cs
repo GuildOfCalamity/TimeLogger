@@ -564,7 +564,20 @@ public class MainViewModel : INotifyPropertyChanged
         if (barchart == null)
             return;
 
-        barchart.Entries = Entries.OrderBy(e => e.Date).ToList();
+        var grouped = Entries
+            .GroupBy(t => t.Date.Date) // normalize to date only
+            .Select(g => new TaskEntry
+            {
+                Date = g.Key,
+                TimeSpent = TimeSpan.FromTicks(g.Sum(x => x.TimeSpent.Ticks)),
+                Description = g.Count() == 1 ? "1 entry" : $"{g.Count()} entries",
+                Url = DefaultUrl ?? string.Empty
+            })
+            .OrderBy(x => x.Date)
+            .ToList();
+
+
+        barchart.Entries = grouped;
     }
     #endregion
 }
