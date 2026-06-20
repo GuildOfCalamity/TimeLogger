@@ -114,7 +114,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _dialogService = dialogService;
         _dialogService!.Instance!.Loaded += MainWindow_Loaded;
-        
+
         #region [ICommands]
         AddEntryCommand = new RelayCommand(AddEntry);
         ChartCommand = new RelayCommand(ToggleChart);
@@ -179,18 +179,18 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 if (BarChartPreferred)
                 {
-                    window.barchart.Dispatcher.Invoke(() => 
-                    { 
-                        SetupBarChart(window.barchart); 
+                    window.barchart.Dispatcher.Invoke(() =>
+                    {
+                        SetupBarChart(window.barchart);
                         window.barchart.Visibility = Visibility.Visible;
                         window.sweep.Visibility = Visibility.Collapsed;
                     });
                 }
                 else
                 {
-                    window.sweep.Dispatcher.Invoke(() => 
-                    { 
-                        SetupSweepChart(window.sweep); 
+                    window.sweep.Dispatcher.Invoke(() =>
+                    {
+                        SetupSweepChart(window.sweep);
                         window.sweep.Visibility = Visibility.Visible;
                         window.barchart.Visibility = Visibility.Collapsed;
                     });
@@ -279,7 +279,7 @@ public class MainViewModel : INotifyPropertyChanged
             Url = !string.IsNullOrWhiteSpace(UrlInput) ? UrlInput : DefaultUrl,
             TimeSpent = WorkTimeParser.Parse(TimeInput),
             Date = NewEntryDate  // Date = DateTime.Now // Date = DateTime.Today
-        }; 
+        };
 
         #region [Duplicate Check]
         bool isDuplicate = Entries.Any(e =>
@@ -308,12 +308,12 @@ public class MainViewModel : INotifyPropertyChanged
         #endregion
 
         #region [Update charts]
-        TimeSeries = new List<ChartSeries> 
-        { 
-            new ChartSeries 
-            { 
+        TimeSeries = new List<ChartSeries>
+        {
+            new ChartSeries
+            {
                 Points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList()
-            } 
+            }
         };
         if (!ChartVisible)
         {
@@ -435,7 +435,7 @@ public class MainViewModel : INotifyPropertyChanged
                 Points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList()
             }
         };
-        
+
         if (BarChartPreferred)
             SetupBarChart(_dialogService!.Instance!.barchart);
         else
@@ -551,9 +551,20 @@ public class MainViewModel : INotifyPropertyChanged
         if (sweep == null)
             return;
 
+        // No grouping, just raw entries.
+        /*
         var points = Entries.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList();
-        sweep.ItemsSource = new ObservableCollection<Models.ChartPoint>();
+        sweep.ItemsSource = new ObservableCollection<ChartPoint>();
         foreach (var cp in points)
+        {
+            sweep.ItemsSource.Add(cp);
+        }
+        */
+
+        var list = GroupByDate() ?? new List<TaskEntry>();
+        var scpoints = list.Select(e => new ChartPoint(e.Date, e.TimeSpent.TotalHours, "hours", e.Description)).ToList();
+        sweep.ItemsSource = new ObservableCollection<ChartPoint>();
+        foreach (var cp in scpoints)
         {
             sweep.ItemsSource.Add(cp);
         }
@@ -564,33 +575,101 @@ public class MainViewModel : INotifyPropertyChanged
         if (barchart == null)
             return;
 
-        var grouped = Entries
-            .GroupBy(t => t.Date.Date) // normalize to date only
-            .Select(g => new TaskEntry
+        barchart.Entries = GroupByDate() ?? new List<TaskEntry>();
+
+        #region [Other Groupings]
+        // Group by TimeSpent value (unrounded), creating a list of anonymous
+        // objects that contain the TimeSpent, the list of entries with that
+        // TimeSpent, total entries, and their descriptions.
+        /*
+        var groupedTimeSpent = Entries
+            .GroupBy(t => t.TimeSpent)
+            .Select(g => new
+            {
+                TimeSpent = g.Key,
+                Entries = g.ToList(),
+                TotalEntries = g.Count(),
+                Descriptions = g.Select(x => x.Description).ToList()
+            })
+            .OrderBy(x => x.TimeSpent)
+            .ToList();
+        */
+
+
+        // Groups entries by their TimeSpent value rounded to the nearest hour,
+        // creating a list of anonymous objects that contain the rounded hours,
+        // total time for that group, and the list of entries in that group.
+        /*
+        var groupedByRoundedHours = Entries
+            .GroupBy(t => Math.Round(t.TimeSpent.TotalHours, 0))
+            .Select(g => new
+            {
+                Hours = g.Key,
+                TotalTime = TimeSpan.FromHours(g.Sum(x => x.TimeSpent.TotalHours)),
+                Entries = g.ToList()
+            })
+            .ToList();
+        */
+        #endregion
+    }
+
+    /// <summary>
+    /// Groups entries by date, creating a list of <see cref="TaskEntry"/> 
+    /// objects where each entry represents a single day with the total time 
+    /// spent and a description indicating the number of entries for that day.
+    /// </summary>
+    List<TaskEntry>? GroupByDate()
+    {
+        return Entries
+        .GroupBy(t => t.Date.Date) // normalize to date only
+        .Select(g => new TaskEntry
+        {
+            Date = g.Key,
+            TimeSpent = TimeSpan.FromTicks(g.Sum(x => x.TimeSpent.Ticks)),
+            Description = g.Count() == 1 ? "1 entry" : $"{g.Count()} entries",
+            Url = DefaultUrl ?? string.Empty
+        })
+        .OrderBy(x => x.Date)
+        .ToList();
+    }
+
+    /// <summary>
+    /// Groups entries by date, creating a list of <see cref="DailyTaskSummary"/> 
+    /// objects that contain the date, total time spent, and descriptions of 
+    /// the entries for each date.
+    /// </summary>
+    List<DailyTaskSummary> GroupByDailyTaskSummary()
+    {
+        return Entries
+            .GroupBy(t => t.Date.Date)
+            .Select(g => new DailyTaskSummary
             {
                 Date = g.Key,
-                TimeSpent = TimeSpan.FromTicks(g.Sum(x => x.TimeSpent.Ticks)),
-                Description = g.Count() == 1 ? "1 entry" : $"{g.Count()} entries",
-                Url = DefaultUrl ?? string.Empty
+                TotalTime = TimeSpan.FromTicks(g.Sum(x => x.TimeSpent.Ticks)),
+                Descriptions = g.Select(x => x.Description).ToList(),
+                Urls = g.Select(x => x.Url).ToList()
             })
             .OrderBy(x => x.Date)
             .ToList();
-        
-        barchart.Entries = grouped;
+    }
 
-        //var groupedDTS = Entries
-        //    .GroupBy(t => t.Date.Date)
-        //    .Select(g => new DailyTaskSummary
-        //    {
-        //        Date = g.Key,
-        //        TotalTime = TimeSpan.FromTicks(g.Sum(x => x.TimeSpent.Ticks)),
-        //        Descriptions = g.Select(x => x.Description).ToList(),
-        //        Urls = g.Select(x => x.Url).ToList()
-        //    })
-        //    .OrderBy(x => x.Date)
-        //    .ToList();
-        //
-        //barchart.SummaryEntries = groupedDTS;
+    /// <summary>
+    /// Groups entries by their TimeSpent value, creating a list of 
+    /// <see cref="TimeSpentGroup"/> objects that contain the TimeSpent, 
+    /// the list of entries with that TimeSpent, and their descriptions.
+    /// </summary>
+    List<TimeSpentGroup> GroupByTimeSpentGroup()
+    {
+        return Entries
+            .GroupBy(t => t.TimeSpent)
+            .Select(g => new TimeSpentGroup
+            {
+                TimeSpent = g.Key,
+                Entries = g.ToList(),
+                Descriptions = g.Select(x => x.Description).ToList()
+            })
+            .OrderBy(x => x.TimeSpent)
+            .ToList();
     }
     #endregion
 }
