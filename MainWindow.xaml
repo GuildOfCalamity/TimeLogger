@@ -466,7 +466,9 @@
             </ListBox>
         </Border>
 
-        <!--  CHARTS  -->
+        <!--#region [CHARTS]-->
+
+        <!--  This is a point-graph chart showing each individual data point  -->
         <ctrl:CartesianChart
             x:Name="chart"
             Grid.Row="2"
@@ -475,6 +477,7 @@
             Series="{Binding TimeSeries}"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}}" />
 
+        <!--  This is a point-graph chart showing each individual data point  -->
         <ctrl:SweepChart
             x:Name="sweep"
             Grid.Row="1"
@@ -495,6 +498,7 @@
             TracePenColor="#60F0F0F0"
             Visibility="{Binding ChartVisible, Mode=OneWay, FallbackValue=Hidden, Converter={StaticResource boolToVisibility}, ConverterParameter=reverse}" />
 
+        <!--  This is a grouped bar chart showing combined data points  -->
         <ctrl:BarChart
             x:Name="barchart"
             Grid.Row="1"
@@ -502,7 +506,10 @@
             BarBorderColor="#15F0F0F0"
             BarFillColor="#151E90FF"
             Entries="{Binding Entries, Mode=OneWay}"
+            HoverStrength="0.75"
             TextColor="#20F0F0F0" />
+
+        <!--#endregion-->
 
     </Grid>
 

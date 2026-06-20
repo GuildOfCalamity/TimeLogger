@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
@@ -19,6 +20,7 @@ namespace TimeLogger.Controls
             IsVisibleChanged += (_, _) => RedrawEntries();
         }
 
+        #region [Properties]
         public List<TaskEntry> Entries
         {
             get => (List<TaskEntry>)GetValue(EntriesProperty);
@@ -80,6 +82,19 @@ namespace TimeLogger.Controls
             set => SetValue(AnimateBarsProperty, value);
         }
 
+        public static readonly DependencyProperty HoverStrengthProperty = DependencyProperty.Register(
+            nameof(HoverStrength),
+            typeof(double),
+            typeof(BarChart),
+            new PropertyMetadata(0.9));
+        public double HoverStrength
+        {
+            get => (double)GetValue(HoverStrengthProperty);
+            set => SetValue(HoverStrengthProperty, value);
+        }
+
+        #endregion
+
         void RedrawEntries()
         {
             PART_BarCanvas.Children.Clear();
@@ -125,7 +140,6 @@ namespace TimeLogger.Controls
                     StrokeThickness = 2,
                     SnapsToDevicePixels = true
                 };
-
 
                 // Tooltip
                 var tooltip = new ToolTip
@@ -223,6 +237,36 @@ namespace TimeLogger.Controls
                     //valueText.Foreground = new SolidColorBrush(TextColor);
                 }
 
+                rect.MouseEnter += (s, e) =>
+                {
+                    //var fade = new DoubleAnimation
+                    //{
+                    //    To = 1.0,
+                    //    Duration = TimeSpan.FromMilliseconds(300),
+                    //    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                    //};
+                    //rect.BeginAnimation(UIElement.OpacityProperty, fade);
+                    rect.Fill = new SolidColorBrush(Color.FromArgb(ToByte(HoverStrength), BarFillColor.R, BarFillColor.G, BarFillColor.B));
+                    rect.Stroke = new SolidColorBrush(Color.FromArgb(ToByte(HoverStrength), BarBorderColor.R, BarBorderColor.G, BarBorderColor.B));
+                    valueText.Foreground = new SolidColorBrush(Color.FromArgb(ToByte(HoverStrength), TextColor.R, TextColor.G, TextColor.B));
+                };
+
+                rect.MouseLeave += (s, e) =>
+                {
+                    //var fade = new DoubleAnimation
+                    //{
+                    //    To = ToDouble(BarFillColor.A),
+                    //    Duration = TimeSpan.FromMilliseconds(300),
+                    //    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                    //};
+                    //rect.BeginAnimation(UIElement.OpacityProperty, fade);
+                    rect.Fill = new SolidColorBrush(BarFillColor);
+                    rect.Stroke = new SolidColorBrush(BarBorderColor);
+                    valueText.Foreground = new SolidColorBrush(TextColor);
+                };
+
+
+
                 PART_BarCanvas.Children.Add(valueText);
 
 
@@ -233,6 +277,26 @@ namespace TimeLogger.Controls
             //IEnumerable<string> amounts = points.Select(p => $"{p.TimeSpent.TotalHours:0.0}h");
             //PART_LabelPanel.ItemsSource = amounts;
         }
+
+        /// <summary>
+        /// Converts a normalized double value (0.0 - 1.0) to a byte (0 - 255).
+        /// Values outside the range are clamped.
+        /// </summary>
+        public static byte ToByte(double value)
+        {
+            value = Math.Max(0.0, Math.Min(1.0, value));
+            return (byte)Math.Round(value * 255.0);
+        }
+
+        /// <summary>
+        /// Converts a normalized byte value (0 - 255) to a double (0.0 - 1.0).
+        /// </summary>
+        public static double ToDouble(byte value)
+        {
+            return value / 255.0;
+        }
+
+
 
         #region [Not Used]
         public IEnumerable<ChartPoint> ItemsSource

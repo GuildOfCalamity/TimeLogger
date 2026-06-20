@@ -575,9 +575,22 @@ public class MainViewModel : INotifyPropertyChanged
             })
             .OrderBy(x => x.Date)
             .ToList();
-
-
+        
         barchart.Entries = grouped;
+
+        //var groupedDTS = Entries
+        //    .GroupBy(t => t.Date.Date)
+        //    .Select(g => new DailyTaskSummary
+        //    {
+        //        Date = g.Key,
+        //        TotalTime = TimeSpan.FromTicks(g.Sum(x => x.TimeSpent.Ticks)),
+        //        Descriptions = g.Select(x => x.Description).ToList(),
+        //        Urls = g.Select(x => x.Url).ToList()
+        //    })
+        //    .OrderBy(x => x.Date)
+        //    .ToList();
+        //
+        //barchart.SummaryEntries = groupedDTS;
     }
     #endregion
 }
