@@ -26,9 +26,13 @@
 
 ![Data](./Screenshot6.png)
 
-> Additional app settings
+> Custom BarChart
 
 ![Config](./Screenshot7.png)
+
+> Additional app settings
+
+![Config](./Screenshot8.png)
 
 **Dependencies**
 
