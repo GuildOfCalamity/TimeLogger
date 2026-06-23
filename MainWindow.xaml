@@ -482,7 +482,7 @@
             x:Name="sweep"
             Grid.Row="1"
             Margin="8,2"
-            DayAmount="14.0"
+            DayAmount="{Binding LookBackDays, Mode=OneWay}"
             DisableSweep="False"
             DrawLabels="False"
             FadeSeconds="{Binding FadeSeconds, Mode=OneWay}"

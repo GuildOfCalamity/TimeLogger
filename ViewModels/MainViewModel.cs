@@ -20,6 +20,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ObservableCollection<TaskEntry> Entries { get; } = new();
     public double SweepSpeed { get; set; }
     public double FadeSeconds { get; set; }
+    public double LookBackDays { get; set; }
     public bool UseBusinessWeek { get; set; }
     public bool BarChartPreferred { get; set; }
     public string? DescriptionInput { get; set; }
@@ -85,6 +86,14 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public string AverageTotalDisplay
+    {
+        get
+        {
+            return Extensions.FormatTime(TimeSpan.FromHours(GetAverageHoursPerDay(Entries)));
+        }
+    }
+
     List<ChartSeries> _timeSeries = new List<ChartSeries>();
     public List<ChartSeries> TimeSeries
     {
@@ -132,14 +141,16 @@ public class MainViewModel : INotifyPropertyChanged
 
         #region [Load app configs]
         DefaultUrl = ConfigManager.Get("DefaultUrl", defaultValue: string.Empty);
-        UseBusinessWeek = ConfigManager.Get("UseBusinessWeek", defaultValue: true);
-        BarChartPreferred = ConfigManager.Get("BarChartPreferred", defaultValue: true);
+        UseBusinessWeek = ConfigManager.Get(nameof(UseBusinessWeek), defaultValue: true);
+        BarChartPreferred = ConfigManager.Get(nameof(BarChartPreferred), defaultValue: true);
+        LookBackDays = ConfigManager.Get(nameof(LookBackDays), defaultValue: 7.0);
         SweepSpeed = ConfigManager.Get("SweepSpeed", defaultValue: 100.0);
         FadeSeconds = ConfigManager.Get("FadeSeconds", defaultValue: 5.0);
         if (string.IsNullOrEmpty(DefaultUrl))
         {
             ConfigManager.Set(nameof(UseBusinessWeek), true, saveAfterUpdate: true);
             ConfigManager.Set(nameof(BarChartPreferred), true, saveAfterUpdate: true);
+            ConfigManager.Set(nameof(LookBackDays), 7.0, saveAfterUpdate: true);
             DefaultUrl = "https://azuredevops.com";
             ConfigManager.Set("DefaultUrl", "https://azuredevops.com", saveAfterUpdate: true);
             ConfigManager.Set("SweepSpeed", 100.0, saveAfterUpdate: true);
@@ -155,6 +166,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             if (_loaded)
                 await DataStore.SaveAsync(Entries);
+            Notify(nameof(AverageTotalDisplay));
             Notify(nameof(TodayTotalDisplay));
             Notify(nameof(WeekTotalDisplay));
         };
@@ -179,7 +191,7 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 if (BarChartPreferred)
                 {
-                    window.barchart.Dispatcher.Invoke(() =>
+                    _dialogService.RunOnUI(() =>
                     {
                         SetupBarChart(window.barchart);
                         window.barchart.Visibility = Visibility.Visible;
@@ -188,7 +200,7 @@ public class MainViewModel : INotifyPropertyChanged
                 }
                 else
                 {
-                    window.sweep.Dispatcher.Invoke(() =>
+                    _dialogService.RunOnUI(() =>
                     {
                         SetupSweepChart(window.sweep);
                         window.sweep.Visibility = Visibility.Visible;
@@ -198,11 +210,12 @@ public class MainViewModel : INotifyPropertyChanged
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ERROR] While setting up chart: {ex.Message}");
+                _dialogService.ShowWarning($"Error while setting up chart:{Environment.NewLine}{ex.Message}");
             }
             finally
             {
                 _loaded = true;
+                //_dialogService.ShowBig($"Daily Average{Environment.NewLine}{AverageTotalDisplay}");
             }
         });
     }
@@ -230,16 +243,18 @@ public class MainViewModel : INotifyPropertyChanged
         foreach (var entry in loaded.OrderByDescending(e => e.Date))
             Entries.Add(entry);
 
+        Notify(nameof(AverageTotalDisplay));
         Notify(nameof(TodayTotalDisplay));
         Notify(nameof(WeekTotalDisplay));
     }
-
+    
     async Task LoadAsyncAscending()
     {
         var loaded = await DataStore.LoadAsync();
         foreach (var entry in loaded.OrderBy(e => e.Date))
             Entries.Add(entry);
 
+        Notify(nameof(AverageTotalDisplay));
         Notify(nameof(TodayTotalDisplay));
         Notify(nameof(WeekTotalDisplay));
     }
@@ -341,6 +356,7 @@ public class MainViewModel : INotifyPropertyChanged
         Notify(nameof(DescriptionInput));
         Notify(nameof(UrlInput));
         Notify(nameof(TimeInput));
+        Notify(nameof(AverageTotalDisplay));
         Notify(nameof(TodayTotalDisplay));
         Notify(nameof(WeekTotalDisplay));
     }
@@ -376,6 +392,7 @@ public class MainViewModel : INotifyPropertyChanged
             Entries.Insert(index, vm.EditedEntry);
             // Save will occur in Entries.CollectionChanged event handler.
 
+            Notify(nameof(AverageTotalDisplay));
             Notify(nameof(TodayTotalDisplay));
             Notify(nameof(WeekTotalDisplay));
         }
@@ -412,6 +429,7 @@ public class MainViewModel : INotifyPropertyChanged
             Entries.Insert(index, vm.EditedEntry);
             // Save will occur in Entries.CollectionChanged event handler.
 
+            Notify(nameof(AverageTotalDisplay));
             Notify(nameof(TodayTotalDisplay));
             Notify(nameof(WeekTotalDisplay));
         }
@@ -442,6 +460,7 @@ public class MainViewModel : INotifyPropertyChanged
             SetupSweepChart(_dialogService!.Instance!.sweep);
         #endregion
 
+        Notify(nameof(AverageTotalDisplay));
         Notify(nameof(TodayTotalDisplay));
         Notify(nameof(WeekTotalDisplay));
     }
@@ -611,6 +630,14 @@ public class MainViewModel : INotifyPropertyChanged
             .ToList();
         */
         #endregion
+    }
+
+    double GetAverageHoursPerDay(IEnumerable<TaskEntry> entries)
+    {
+        return entries
+            .GroupBy(t => t.Date.Date)
+            .Select(g => TimeSpan.FromTicks(g.Sum(x => x.TimeSpent.Ticks)))
+            .Average(ts => ts.TotalHours);
     }
 
     /// <summary>

@@ -19,6 +19,13 @@ public interface IDialogService
     bool? Show(string message);
 
     /// <summary>
+    /// Same as <see cref="ShowInfo(string)"/> but with a more generic name. 
+    /// This is the default method for showing messages to the user.
+    /// </summary>
+    /// <param name="message">The message to display in the dialog.</param>
+    bool? ShowBig(string message);
+
+    /// <summary>
     /// Same as <see cref="Show(string)"/> but with a specific name. 
     /// </summary>
     /// <param name="message">The message to display in the dialog.</param>
@@ -36,6 +43,13 @@ public interface IDialogService
     /// </summary>
     /// <param name="message">The message to display in the dialog.</param>
     bool? ShowOKCancel(string message);
+
+    /// <summary>
+    /// Runs the specified action on the UI thread. If the current thread is the UI thread, 
+    /// it executes the action immediately; otherwise, it dispatches the action to the UI thread.
+    /// </summary>
+    /// <param name="action">The action to run on the UI thread.</param>
+    void RunOnUI(Action action);
 }
 
 public class DialogService : IDialogService
@@ -48,6 +62,14 @@ public class DialogService : IDialogService
     }
 
     public bool? Show(string message) => ShowInfo(message);
+
+    public bool? ShowBig(string message)
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+            return WpfMessageBox.Show(message, false, false, owner: Instance);
+        else
+            return Application.Current.Dispatcher.Invoke(() => WpfMessageBox.Show(message, false, false, fontSize: 24, owner: Instance));
+    }
 
     public bool? ShowInfo(string message)
     {
@@ -71,5 +93,13 @@ public class DialogService : IDialogService
             return WpfMessageBox.Show(message, true, false, owner: Instance);
         else
             return Application.Current.Dispatcher.Invoke(() => WpfMessageBox.Show(message, true, false, owner: Instance));
+    }
+
+    public void RunOnUI(Action action)
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+            action();
+        else
+            Application.Current.Dispatcher.Invoke(action);
     }
 }

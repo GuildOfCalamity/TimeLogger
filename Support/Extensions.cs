@@ -329,7 +329,7 @@ public static class Extensions
             //  - TimeSpan.MaxValue = long.MaxValue
             //  - TimeSpan.MinValue = long.MinValue
             //  - TimeSpan.TicksPerMicrosecond = 10 (not available in older .NET versions)
-            parts.Add($"{(timeSpan.Ticks * 10)} microsecond{((timeSpan.Ticks * 10) > 1 ? "s" : "")}");
+            parts.Add($"{(timeSpan.Ticks * TimeSpan.TicksPerMicrosecond)} microsecond{((timeSpan.Ticks * TimeSpan.TicksPerMicrosecond) > 1 ? "s" : "")}");
         }
 
         // Join the sections with commas & "and" for the last one.
