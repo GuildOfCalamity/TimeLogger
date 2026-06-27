@@ -544,6 +544,7 @@ namespace TimeLogger.Controls
                 return;
 
             //DateTime weekStart = GetNDayWeekStart(DateTime.Now, DayAmount);
+            //DateTime weekStart = GetBusinessDayStart(DayAmount);
             DateTime weekStart = GetDayStart(DayAmount);
             DateTime weekEnd = weekStart.AddDays(DayAmount);
 
@@ -794,6 +795,27 @@ namespace TimeLogger.Controls
             int diff = (int)days;
             return DateTime.Now.AddDays(-diff);
         }
+
+        static DateTime GetBusinessDayStart(double businessDays)
+        {
+            int daysToGo = (int)businessDays;
+            DateTime date = DateTime.Now.Date;
+
+            while (daysToGo > 0)
+            {
+                date = date.AddDays(-1);
+
+                // Only count Monday–Friday
+                if (date.DayOfWeek != DayOfWeek.Saturday &&
+                    date.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    daysToGo--;
+                }
+            }
+
+            return date;
+        }
+
 
         Point GetCurrentSweepPoint()
         {

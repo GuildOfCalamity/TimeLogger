@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
@@ -21,6 +22,24 @@ namespace TimeLogger.Controls
         }
 
         #region [Properties]
+        public static readonly DependencyProperty BarClickedCommandProperty = DependencyProperty.Register(
+            nameof(BarClickedCommand),
+            typeof(ICommand),
+            typeof(BarChart),
+            new PropertyMetadata(null));
+
+        public ICommand BarClickedCommand
+        {
+            get => (ICommand)GetValue(BarClickedCommandProperty);
+            set => SetValue(BarClickedCommandProperty, value);
+        }
+        
+        void OnBarClicked(TaskEntry point)
+        {
+            if (BarClickedCommand?.CanExecute(point) == true)
+                BarClickedCommand?.Execute(point);
+        }
+
         public List<TaskEntry> Entries
         {
             get => (List<TaskEntry>)GetValue(EntriesProperty);
@@ -265,7 +284,11 @@ namespace TimeLogger.Controls
                     valueText.Foreground = new SolidColorBrush(TextColor);
                 };
 
-
+                rect.MouseDown += (s, e) =>
+                {
+                    // Fire event for any bound ICommand handlers
+                    OnBarClicked(p);
+                };
 
                 PART_BarCanvas.Children.Add(valueText);
 

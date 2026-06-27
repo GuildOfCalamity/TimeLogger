@@ -34,6 +34,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand DeleteEntryCommand { get; }
     public ICommand DoubleClickCommand { get; }
     public ICommand ChartPointSelectedCommand { get; }
+    public ICommand BarSelectedCommand { get; }
 
     TaskEntry? _selectedEntry;
     public TaskEntry? SelectedEntry
@@ -132,6 +133,7 @@ public class MainViewModel : INotifyPropertyChanged
         DoubleClickCommand = new RelayCommand(EditSelectedEntry);
         DeleteEntryCommand = new RelayCommand<TaskEntry>(DeleteEntry);
         ChartPointSelectedCommand = new RelayCommand<ChartPoint>(OnChartPointSelected);
+        BarSelectedCommand = new RelayCommand<TaskEntry>(OnBarSelected);
         #endregion
 
         ConfigManager.OnError += (s, e) =>
@@ -170,6 +172,24 @@ public class MainViewModel : INotifyPropertyChanged
             Notify(nameof(TodayTotalDisplay));
             Notify(nameof(WeekTotalDisplay));
         };
+    }
+
+    public void OnBarSelected(TaskEntry entry)
+    {
+        try
+        {
+            // The incoming entry can be a grouped entry, so we need to find the first matching entry in the Entries collection.
+            var selection = Entries.Where(e => 
+                e.Date.Year == entry.Date.Year && 
+                e.Date.Month == entry.Date.Month && 
+                e.Date.Day == entry.Date.Day).FirstOrDefault();
+
+            if (selection == null)
+                return;
+
+            SelectedEntry = selection;
+        }
+        catch { }
     }
 
     /// <summary>
