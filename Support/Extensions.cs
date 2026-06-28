@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -343,6 +344,90 @@ public static class Extensions
             parts.RemoveAt(parts.Count - 1);
             return isNegative ? $"Negative " + string.Join(", ", parts) + " and " + lastPart : string.Join(", ", parts) + " and " + lastPart;
         }
+    }
+
+    /// <summary>
+    /// Returns a description like: "today at 3:45 PM (in 1h 20m)" or "on Fri at 9:00 AM (in 2d 4h)"
+    /// </summary>
+    public static string DescribeFutureTime(this TimeSpan delta, DateTimeOffset? reference = null, CultureInfo culture = null)
+    {
+        if (delta < TimeSpan.Zero)
+            delta = TimeSpan.Zero; // clamp
+
+        var now = reference ?? DateTimeOffset.Now;
+        var target = now + delta;
+
+        if (culture == null)
+            culture = CultureInfo.CurrentCulture;
+
+        string when = DescribeDayAndTime(now, target, culture);
+        string rel = DescribeRelative(delta);
+
+        return $"{when} ({rel})";
+    }
+
+    /// <summary>
+    ///   <code>
+    ///     Extensions.DescribeDayAndTime(new DateTimeOffset(DateTime.Now.AddHours(1)), CultureInfo.CurrentCulture);
+    ///   </code>
+    /// </summary>
+    /// <returns>"today at 9:00 AM"</returns>
+    public static string DescribeDayAndTime(DateTimeOffset target, CultureInfo culture)
+    {
+        return DescribeDayAndTime(DateTimeOffset.Now, target, culture ?? System.Globalization.CultureInfo.CurrentCulture);
+    }
+
+    static string DescribeDayAndTime(DateTimeOffset now, DateTimeOffset target, CultureInfo culture)
+    {
+        DateTime today = now.Date;
+        DateTime tDate = target.Date;
+        string dayPart = string.Empty;
+
+        if (tDate == today)
+            dayPart = "today";
+        else if (tDate == today.AddDays(1))
+            dayPart = "tomorrow";
+        else if (tDate <= today.AddDays(7)) // e.g., "on Tue"
+            dayPart = "on " + culture.DateTimeFormat.AbbreviatedDayNames[(int)tDate.DayOfWeek];
+        else // e.g., "on Aug 25, 2025"
+            dayPart = "on " + target.ToString(culture.DateTimeFormat.ShortDatePattern, culture);
+
+        string timePart = target.ToLocalTime().ToString("t", culture); // short time
+
+        return $"{dayPart} at {timePart}";
+    }
+
+    public static string DescribeRelative(TimeSpan delta)
+    {
+        if (delta < TimeSpan.FromSeconds(1))
+            return "now";
+
+        int components = 0;
+        var sb = new StringBuilder();
+
+        void add(string label, long value)
+        {
+            if (value <= 0 || components >= 2)
+                return;
+            if (sb.Length > 0)
+                sb.Append(' ');
+            sb.Append(value).Append(label);
+            components++;
+        }
+
+        add("day", (long)delta.TotalDays);
+        delta -= TimeSpan.FromDays((long)delta.TotalDays);
+
+        add("hr", (long)delta.TotalHours);
+        delta -= TimeSpan.FromHours((long)delta.TotalHours);
+
+        add("min", (long)delta.TotalMinutes);
+        delta -= TimeSpan.FromMinutes((long)delta.TotalMinutes);
+
+        if (components < 2)
+            add("sec", (long)Math.Round(delta.TotalSeconds));
+
+        return $"in {sb}";
     }
 
     /// <summary>
