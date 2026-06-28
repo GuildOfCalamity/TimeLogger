@@ -510,6 +510,7 @@
             BarFillColor="#151E90FF"
             Entries="{Binding Entries, Mode=OneWay}"
             HoverStrength="0.75"
+            RotateText="True"
             TextColor="#20F0F0F0" />
 
         <!--#endregion-->

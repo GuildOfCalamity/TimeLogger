@@ -94,7 +94,6 @@ namespace TimeLogger.Controls
             typeof(bool),
             typeof(BarChart),
             new PropertyMetadata(true));
-
         public bool AnimateBars
         {
             get => (bool)GetValue(AnimateBarsProperty);
@@ -112,6 +111,16 @@ namespace TimeLogger.Controls
             set => SetValue(HoverStrengthProperty, value);
         }
 
+        public static readonly DependencyProperty RotateTextProperty = DependencyProperty.Register(
+            nameof(RotateText),
+            typeof(bool),
+            typeof(BarChart),
+            new PropertyMetadata(true));
+        public bool RotateText
+        {
+            get => (bool)GetValue(RotateTextProperty);
+            set => SetValue(RotateTextProperty, value);
+        }
         #endregion
 
         void RedrawEntries()
@@ -233,10 +242,10 @@ namespace TimeLogger.Controls
                     Text = $"{p.TimeSpent.TotalHours:0.0}",
                     Foreground = new SolidColorBrush(TextColor),
                     FontWeight = FontWeights.SemiBold,
-                    FontSize = 11,
+                    FontSize = 2.5 + (barWidth / 2.0),
                     TextAlignment = TextAlignment.Center,
                     RenderTransformOrigin = new Point(0.5, 0.5),
-                    RenderTransform = new RotateTransform(90) // ⭐ rotate clockwise
+                    RenderTransform = RotateText ? new RotateTransform(90) : null // ⭐ rotate clockwise
                 };
 
                 // Center horizontally
